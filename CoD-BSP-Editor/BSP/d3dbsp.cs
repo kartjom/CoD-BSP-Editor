@@ -131,5 +131,38 @@ namespace CoD_BSP_Editor.BSP
 
             return bspFile.ToArray();
         }
+
+        public static string CreateArenaFile(string fileName)
+        {
+            List<string> arenaContentList = new List<string>()
+            {
+                "{",
+                $"\tmap\t\t\t\"{fileName}\"",
+                $"\tlongname\t\"{fileName}\"",
+                "\tgametype\t\"dm tdm ctf\"",
+                "}"
+            };
+
+            string arenaContent = string.Join('\n', arenaContentList);
+            return arenaContent;
+        }
+
+        public static string CreateGscFile(string fileName)
+        {
+            List<string> gscContentList = new List<string>()
+            {
+                "main()",
+                "{",
+                "\tmaps\\mp\\_load::main();",
+                "\tmaps\\mp\\_flak_gmi::main();",
+                "\n\tsetcvar(\"sv_night\", \"0\");\n",
+                "\tlevel thread maps\\mp\\_tankdrive_gmi::main();",
+                "\tlevel thread maps\\mp\\_jeepdrive_gmi::main();",
+                "}"
+            };
+
+            string gscContent = string.Join('\n', gscContentList);
+            return gscContent;
+        }
     }
 }

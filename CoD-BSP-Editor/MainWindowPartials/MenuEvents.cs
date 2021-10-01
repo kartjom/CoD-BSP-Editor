@@ -4,6 +4,7 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,16 +44,17 @@ namespace CoD_BSP_Editor
         {
             if (bsp == null) return;
 
-            string SavePath = "";
-
             SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "BSP files (*.bsp)|*.bsp";
+            saveFileDialog.Filter = "BSP files (*.bsp,*.pk3)|*.bsp;*.pk3";
             saveFileDialog.InitialDirectory = bsp.FileDirectory;
             saveFileDialog.FileName = bsp.FileName;
 
+            string SaveDirectory, FileName, FileExtension;
             if (saveFileDialog.ShowDialog() == true)
             {
-                SavePath = saveFileDialog.FileName;
+                SaveDirectory = Path.GetDirectoryName(saveFileDialog.FileName);
+                FileName = Path.GetFileNameWithoutExtension(saveFileDialog.FileName);
+                FileExtension = Path.GetExtension(saveFileDialog.FileName);
             }
             else
             {
@@ -68,7 +70,36 @@ namespace CoD_BSP_Editor
             bsp.UpdateEntities(entityList);
             byte[] bspContent = bsp.CreateBSP();
 
-            File.WriteAllBytes(SavePath, bspContent);
+            if (FileExtension == ".pk3")
+            {
+                string Pk3FolderDirectory = Path.Combine(SaveDirectory, FileName + "_temp");
+
+                Directory.CreateDirectory(Pk3FolderDirectory);
+                Directory.CreateDirectory(Pk3FolderDirectory + "/mp");
+                Directory.CreateDirectory(Pk3FolderDirectory + "/maps/mp");
+
+                string arenaContent = d3dbsp.CreateArenaFile(FileName);
+                string gscContent = d3dbsp.CreateGscFile(FileName);
+
+                File.WriteAllBytes(Pk3FolderDirectory + $"/maps/mp/{FileName}.bsp", bspContent);
+                File.WriteAllText(Pk3FolderDirectory + $"/mp/{FileName}.arena", arenaContent);
+                File.WriteAllText(Pk3FolderDirectory + $"/maps/mp/{FileName}.gsc", gscContent);
+
+                string pk3FilePath = Path.Combine(SaveDirectory, FileName + ".pk3");
+                if (File.Exists(pk3FilePath))
+                {
+                    File.Delete(pk3FilePath);
+                }
+
+                ZipFile.CreateFromDirectory(Pk3FolderDirectory, pk3FilePath);
+
+                Directory.Delete(Pk3FolderDirectory, true);
+            }
+            else
+            {
+                string FullFilePath = Path.Combine(SaveDirectory, FileName + FileExtension);
+                File.WriteAllBytes(FullFilePath, bspContent);
+            }
 
             MessageBox.Show("Finished exporting");
         }
