@@ -54,7 +54,7 @@ namespace CoD_BSP_Editor.BSP
             {
                 int lumpLength = Lumps[i].Offset + Lumps[i].Length;
                 int offsetDiff = Lumps[i + 1].Offset - lumpLength;
-                if (offsetDiff != 0)
+                if (offsetDiff > 0)
                 {
                     Lumps[i].Length += offsetDiff;
                 }
