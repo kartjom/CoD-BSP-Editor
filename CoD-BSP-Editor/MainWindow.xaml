@@ -1,0 +1,72 @@
+﻿<Window x:Class="CoD_BSP_Editor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CoD_BSP_Editor"
+        mc:Ignorable="d"
+        Title="Call of Duty - BSP Editor" Height="600" Width="1200" WindowStartupLocation="CenterScreen">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.75*"/>
+            <ColumnDefinition Width="0.25*"/>
+        </Grid.ColumnDefinitions>
+
+        <DockPanel Grid.ColumnSpan="2">
+            <Menu DockPanel.Dock="Top" Height="40" FontSize="16">
+                <MenuItem Header="_File" Padding="10 8 10 8">
+                    <MenuItem Header="_Open" Click="OpenFile" Padding="5" />
+                    <MenuItem Header="_Export" Click="SaveFile" Padding="5" />
+                </MenuItem>
+                <MenuItem Header="_List" Padding="10 8 10 8">
+                    <MenuItem Header="_Create entity" Click="CreateNewEntity" Padding="5" />
+                    <MenuItem Header="_Add entities by string" Click="AddByString" Padding="5" />
+                    <MenuItem Header="_Find next by classname" Click="FindByClassname" Padding="5" />
+                    <MenuItem Header="_Find next by key value" Click="FindByKeyValue" Padding="5" />
+                </MenuItem>
+                <MenuItem Header="_Utility" Padding="10 8 10 8">
+                    <MenuItem Header="_Remove singleplayer entities" Click="RemoveSingleplayerEntities" Padding="5" />
+                    <MenuItem Header="_Add basic spawns" Click="AddBasicSpawns" Padding="5" />
+                </MenuItem>
+                <MenuItem Header="_Info" Padding="10 8 10 8">
+                    <MenuItem Header="_Lump Headers" Click="ShowLumpInfo" Padding="5" />
+                </MenuItem>
+            </Menu>
+            <TextBox AcceptsReturn="True" />
+        </DockPanel>
+
+        <TextBlock FontSize="22" Margin="10" Name="CurrentEntityText" Grid.Row="1"></TextBlock>
+        
+        <ListBox Name="EntityBoxList" SelectionChanged="OnEntitySelect" FontSize="20" Grid.Column="1" Grid.Row="1" Grid.RowSpan="2">
+            <ListBox.Resources>
+                <!--Defines a context menu-->
+                <ContextMenu x:Key="MyElementMenu">
+                    <MenuItem Header="Delete" Click="DeleteSelectedEntity"/>
+                    <MenuItem Header="Delete all of type" Click="DeleteEntitiesByClassname"/>
+                    <Separator />
+                    <MenuItem Header="Rename" Click="RenameSelectedEntity"/>
+                    <MenuItem Header="Rename all of type" Click="RenameEntitiesByClassname"/>
+                    <Separator />
+                    <MenuItem Header="Duplicate" Click="DuplicateSelectedEntity"/>
+                </ContextMenu>
+
+                <!--Sets a context menu for each ListBoxItem in the current ListBox-->
+                <Style TargetType="{x:Type ListBoxItem}">
+                    <Setter Property="ContextMenu" Value="{StaticResource MyElementMenu}"/>
+                </Style>
+            </ListBox.Resources>
+        </ListBox>
+
+        <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Visible">
+            <StackPanel Name="KeyValueFields">
+                
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>
