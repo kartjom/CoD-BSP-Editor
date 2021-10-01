@@ -307,7 +307,82 @@ namespace CoD_BSP_Editor
 
             MessageBox.Show($"Removed {removed} entities");
         }
-        
+
+        private void RemoveByOrigin(object sender, RoutedEventArgs e)
+        {
+            if (bsp == null || bsp.Lumps == null) return;
+
+            InputDialogWindow input = new InputDialogWindow("Remove by origin", "Syntax: operator x y z");
+            input.ShowDialog();
+
+            string inputString = input.GetValue();
+            if (inputString == null) return;
+
+            char charOperator;
+            int x, y, z;
+
+            try
+            {
+                string[] tokens = inputString.Split(' ');
+
+                x = tokens[1] != "*" ? int.Parse(tokens[1]) : int.MaxValue;
+                y = tokens[2] != "*" ? int.Parse(tokens[2]) : int.MaxValue;
+                z = tokens[3] != "*" ? int.Parse(tokens[3]) : int.MaxValue;
+
+                charOperator = tokens[0][0];
+
+                if (charOperator != '<' && charOperator != '>') throw new Exception();
+                if (x == int.MaxValue && y == int.MaxValue && z == int.MaxValue) throw new Exception();
+            }
+            catch
+            {
+                MessageBox.Show("Invalid syntax");
+                return;
+            }
+
+            int removed = 0;
+            for (int i = 0; i < EntityBoxList.Items.Count; i++)
+            {
+                Entity ent = EntityBoxList.Items[i] as Entity;
+
+                if (ent.HasKey("origin") == false) continue;
+
+                string[] tokens = ent.GetValue("origin").Split(' ');
+                int _x = int.Parse(tokens[0]), _y = int.Parse(tokens[1]), _z = int.Parse(tokens[2]);
+               
+                if (charOperator == '>')
+                {
+                    bool xMarked = (x == int.MaxValue || _x > x);
+                    bool yMarked = (y == int.MaxValue || _y > y);
+                    bool zMarked = (z == int.MaxValue || _z > z);
+
+                    if (xMarked && yMarked && zMarked)
+                    {
+                        EntityBoxList.Items.RemoveAt(i--);
+                        removed++;
+
+                        continue;
+                    }
+                }
+                else if (charOperator == '<')
+                {
+                    bool xMarked = (x == int.MaxValue || _x < x);
+                    bool yMarked = (y == int.MaxValue || _y < y);
+                    bool zMarked = (z == int.MaxValue || _z < z);
+
+                    if (xMarked && yMarked && zMarked)
+                    {
+                        EntityBoxList.Items.RemoveAt(i--);
+                        removed++;
+
+                        continue;
+                    }
+                }
+            }
+
+            MessageBox.Show($"Removed {removed} entities");
+        }
+
         private void ShowLumpInfo(object sender, RoutedEventArgs e)
         {
             if (bsp == null || bsp.Lumps == null) return;

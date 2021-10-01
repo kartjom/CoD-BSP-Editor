@@ -33,6 +33,7 @@
                 <MenuItem Header="_Utility" Padding="10 8 10 8">
                     <MenuItem Header="_Remove singleplayer entities" Click="RemoveSingleplayerEntities" Padding="5" />
                     <MenuItem Header="_Add basic spawns" Click="AddBasicSpawns" Padding="5" />
+                    <MenuItem Header="_Remove by origin" Click="RemoveByOrigin" Padding="5" />
                 </MenuItem>
                 <MenuItem Header="_Info" Padding="10 8 10 8">
                     <MenuItem Header="_Lump Headers" Click="ShowLumpInfo" Padding="5" />
