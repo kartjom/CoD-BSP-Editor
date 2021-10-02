@@ -308,6 +308,72 @@ namespace CoD_BSP_Editor
             MessageBox.Show($"Removed {removed} entities");
         }
 
+        private void ReplaceKeyValues(object sender, RoutedEventArgs e)
+        {
+            if (bsp == null || bsp.Lumps == null) return;
+
+            ReplaceKeyValuePairsWindow wnd = new ReplaceKeyValuePairsWindow();
+            wnd.ShowDialog();
+
+            if (wnd.IsConfirmed == false) return;
+
+            var (Classname, WantedStr, ReplaceStr) = wnd.GetValues();
+
+            if (string.IsNullOrEmpty(Classname) || string.IsNullOrEmpty(WantedStr) || string.IsNullOrEmpty(ReplaceStr))
+            {
+                MessageBox.Show("Fill all fields before submiting");
+                return;
+            }
+
+            KeyValuePair<string, string> WantedKeyValue;
+            KeyValuePair<string, string> ReplaceKeyValue;
+
+            try
+            {
+                int spaceIndex = WantedStr.IndexOf(' ');
+                string wantedKey = WantedStr.Substring(0, spaceIndex).Trim();
+                string wantedValue = WantedStr.Substring(spaceIndex).Trim();
+                WantedKeyValue = new(wantedKey, wantedValue);
+
+                spaceIndex = ReplaceStr.IndexOf(' ');
+                string replaceKey = ReplaceStr.Substring(0, spaceIndex).Trim();
+                string replaceValue = ReplaceStr.Substring(spaceIndex).Trim();
+                ReplaceKeyValue = new(replaceKey, replaceValue);
+            }
+            catch
+            {
+                MessageBox.Show("Couldn't parse given data");
+                return;
+            }
+
+            int replaced = 0;
+            for (int i = 0; i < EntityBoxList.Items.Count; i++)
+            {
+                Entity ent = EntityBoxList.Items[i] as Entity;
+
+                if (ent.Classname == Classname || Classname == "*")
+                {
+                    if (ent.HasKey(WantedKeyValue.Key) == false) continue;
+
+                    int index = 0;
+                    foreach (var KeyValue in ent.KeyValues)
+                    {
+                        if (KeyValue.Key == WantedKeyValue.Key && KeyValue.Value == WantedKeyValue.Value)
+                        {
+                            ent.KeyValues[index] = ReplaceKeyValue;
+                            replaced++;
+                            break;
+                        }
+
+                        index++;
+                    }
+                }
+            }
+
+            CreateEditView();
+            MessageBox.Show($"Replaced {replaced} occurences");
+        }
+        
         private void RemoveByOrigin(object sender, RoutedEventArgs e)
         {
             if (bsp == null || bsp.Lumps == null) return;

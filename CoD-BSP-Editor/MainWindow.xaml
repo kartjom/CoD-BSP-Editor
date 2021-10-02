@@ -29,11 +29,12 @@
                     <MenuItem Header="_Add entities by string" Click="AddByString" Padding="5" />
                     <MenuItem Header="_Find next by classname" Click="FindByClassname" Padding="5" />
                     <MenuItem Header="_Find next by key value" Click="FindByKeyValue" Padding="5" />
+                    <MenuItem Header="_Replace key values" Click="ReplaceKeyValues" Padding="5" />
+                    <MenuItem Header="_Remove by origin" Click="RemoveByOrigin" Padding="5" />
                 </MenuItem>
                 <MenuItem Header="_Utility" Padding="10 8 10 8">
                     <MenuItem Header="_Remove singleplayer entities" Click="RemoveSingleplayerEntities" Padding="5" />
                     <MenuItem Header="_Add basic spawns" Click="AddBasicSpawns" Padding="5" />
-                    <MenuItem Header="_Remove by origin" Click="RemoveByOrigin" Padding="5" />
                 </MenuItem>
                 <MenuItem Header="_Info" Padding="10 8 10 8">
                     <MenuItem Header="_Lump Headers" Click="ShowLumpInfo" Padding="5" />
