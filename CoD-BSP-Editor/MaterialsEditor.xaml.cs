@@ -126,40 +126,58 @@ namespace CoD_BSP_Editor
         {
             if (MainWindow.bsp == null) return;
 
-            InputDialogWindow input = new InputDialogWindow("Find material", "Enter material name");
-            input.ShowDialog();
+            DoubleInputDialogWindow wndDialog = new DoubleInputDialogWindow("Find material");
+            wndDialog.FirstLabel.Text = "Enter material name";
+            wndDialog.SecondLabel.Text = "Enter start index (leave empty for default 0):";
 
-            string material = input.GetValue();
-            if (material == null) return;
+            wndDialog.ShowDialog();
 
-            bool exactSearch = (material.StartsWith('*') == false && material.EndsWith('*') == false);
-            bool startsWithSearch = (material.StartsWith('*') == false && material.EndsWith('*') == true);
-            bool endsWithSearch = (material.StartsWith('*') == true && material.EndsWith('*') == false);
-            bool containsSearch = (material.StartsWith('*') == true && material.EndsWith('*') == true);
-
-            material = material.Replace("*", "");
-
-            int index = 0;
-            foreach (Shader shader in MainWindow.bsp.Shaders)
+            if (wndDialog.IsConfirmed == false)
             {
-                string shaderName = ShaderUtils.GetMaterial(shader);
+                return;
+            }
+
+            var (material, startIndexStr) = wndDialog.GetValue();
+
+            if (string.IsNullOrEmpty(material))
+            {
+                MessageBox.Show("Enter valid material name");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(startIndexStr))
+            {
+                startIndexStr = "0";
+            }
+
+            bool exactSearch = material.StartsWith('*') == false && material.EndsWith('*') == false;
+            bool startsWithSearch = material.StartsWith('*') == false && material.EndsWith('*') == true;
+            bool endsWithSearch = material.StartsWith('*') == true && material.EndsWith('*') == false;
+            bool containsSearch = material.StartsWith('*') == true && material.EndsWith('*') == true;
+
+            material = material.Trim('*');
+
+            int startIndex = int.Parse(startIndexStr);
+            for (int i = startIndex; i < MainWindow.bsp.Shaders.Count; i++)
+            {
+                string shaderName = ShaderUtils.GetMaterial(MainWindow.bsp.Shaders[i]);
                 int foundAt = -1;
 
                 if (exactSearch && shaderName == material)
                 {
-                    foundAt = index;
+                    foundAt = i;
                 }
                 else if (startsWithSearch && shaderName.StartsWith(material))
                 {
-                    foundAt = index;
+                    foundAt = i;
                 }
                 else if (endsWithSearch && shaderName.EndsWith(material))
                 {
-                    foundAt = index;
+                    foundAt = i;
                 }
                 else if (containsSearch && shaderName.Contains(material))
                 {
-                    foundAt = index;
+                    foundAt = i;
                 }
 
                 if (foundAt != -1)
@@ -167,8 +185,6 @@ namespace CoD_BSP_Editor
                     MessageBox.Show($"Material found on index {foundAt}");
                     return;
                 }
-
-                index++;
             }
 
             MessageBox.Show("No materials found");
