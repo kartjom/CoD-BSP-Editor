@@ -15,6 +15,7 @@ namespace CoD_BSP_Editor.BSP
         public List<byte[]> BinaryLumps = new List<byte[]>();
 
         public List<Entity> Entities { get; set; }
+        public List<Shader> Shaders { get; set; }
 
         public string FilePath { get; set; }
         public string FileName { get; set; }
@@ -30,6 +31,7 @@ namespace CoD_BSP_Editor.BSP
             this.CorrectLumpsLength();
             this.LoadLumpsData();
 
+            this.ParseShadersLumpToList();
             this.ParseStringEntityLumpToList();
         }
 
@@ -75,6 +77,11 @@ namespace CoD_BSP_Editor.BSP
             }
         }
 
+        private void ParseShadersLumpToList()
+        {
+            this.Shaders = BinLib.ReadListFromByteArray<Shader>(BinaryLumps[0]);
+        }
+
         private void ParseStringEntityLumpToList()
         {
             string entData = this.EntityLumpToString();
@@ -104,6 +111,12 @@ namespace CoD_BSP_Editor.BSP
             }
 
             return newLumpsData;
+        }
+
+        public void UpdateShaders(List<Shader> shaders)
+        {
+            this.Shaders = shaders;
+            this.BinaryLumps[0] = BinLib.ListToByteArray<Shader>(shaders);
         }
 
         public void UpdateEntities(List<Entity> entities)

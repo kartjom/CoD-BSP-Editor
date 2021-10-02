@@ -36,7 +36,8 @@ namespace CoD_BSP_Editor
                 string fileName = Path.GetFileName(openFileDialog.FileName);
                 this.Title = $"Call of Duty - BSP Editor ({fileName})";
 
-                InitializeWorkingEnvironment(bsp.Entities);
+                this.CloseAllWindows();
+                this.InitializeWorkingEnvironment(bsp.Entities);
             }
         }
 
@@ -67,6 +68,8 @@ namespace CoD_BSP_Editor
                 entityList.Add(item);
             }
 
+            /* Update lumps and create BSP */
+            bsp.UpdateShaders(bsp.Shaders);
             bsp.UpdateEntities(entityList);
             byte[] bspContent = bsp.CreateBSP();
 
@@ -449,9 +452,29 @@ namespace CoD_BSP_Editor
             MessageBox.Show($"Removed {removed} entities");
         }
 
+        private void OpenMaterialsEditor(object sender, RoutedEventArgs e)
+        {
+            if (bsp == null) return;
+
+            foreach (Window win in App.Current.Windows)
+            {
+                if (win is MaterialsEditor) return;
+            }
+
+            MaterialsEditor editor = new MaterialsEditor();
+            editor.Owner = this;
+            editor.Title = $"Materials editor ({bsp.FileName})";
+            editor.Show();
+        }
+
         private void ShowLumpInfo(object sender, RoutedEventArgs e)
         {
             if (bsp == null || bsp.Lumps == null) return;
+
+            foreach (Window win in App.Current.Windows)
+            {
+                if (win is LumpInfo) return;
+            }
 
             string mapName = Path.GetFileName(bsp.FilePath);
 

@@ -23,7 +23,7 @@ namespace CoD_BSP_Editor
     /// </summary>
     public partial class MainWindow : Window
     {
-        public d3dbsp bsp;
+        public static d3dbsp bsp = null;
 
         public MainWindow()
         {
@@ -51,6 +51,14 @@ namespace CoD_BSP_Editor
             }
         }
 
+        private void CloseAllWindows()
+        {
+            foreach (Window win in App.Current.Windows)
+            {
+                if (win != this) win.Close();
+            }
+        }
+        
         private void InitializeWorkingEnvironment(List<Entity> EntityList)
         {
             KeyValueFields.Children.Clear();
