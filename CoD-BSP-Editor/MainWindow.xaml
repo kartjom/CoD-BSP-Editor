@@ -27,8 +27,10 @@
                 <MenuItem Header="_List" Padding="10 8 10 8">
                     <MenuItem Header="_Create entity" Click="CreateNewEntity" Padding="5" />
                     <MenuItem Header="_Add entities by string" Click="AddByString" Padding="5" />
+                    <Separator/>
                     <MenuItem Header="_Find next by classname" Click="FindByClassname" Padding="5" />
                     <MenuItem Header="_Find next by key value" Click="FindByKeyValue" Padding="5" />
+                    <Separator/>
                     <MenuItem Header="_Replace key values" Click="ReplaceKeyValues" Padding="5" />
                     <MenuItem Header="_Remove by origin" Click="RemoveByOrigin" Padding="5" />
                 </MenuItem>
@@ -55,6 +57,7 @@
                     <MenuItem Header="Rename" Click="RenameSelectedEntity"/>
                     <MenuItem Header="Rename all of type" Click="RenameEntitiesByClassname"/>
                     <Separator />
+                    <MenuItem Header="Show as text" Click="ShowAsText"/>
                     <MenuItem Header="Duplicate" Click="DuplicateSelectedEntity"/>
                 </ContextMenu>
 

@@ -21,14 +21,12 @@ namespace CoD_BSP_Editor
         private void DeleteSelectedEntity(object sender, RoutedEventArgs e)
         {
             if (bsp == null) return;
+            if (EntityBoxList.SelectedIndex == -1) return;
 
-            if (EntityBoxList.SelectedIndex != -1)
-            {
-                MessageBoxResult result = MessageBox.Show("Confirm deleting selected entity", "Remove entity", MessageBoxButton.YesNo);
-                if (result == MessageBoxResult.No) return;
+            MessageBoxResult result = MessageBox.Show("Confirm deleting selected entity", "Remove entity", MessageBoxButton.YesNo);
+            if (result == MessageBoxResult.No) return;
 
-                EntityBoxList.Items.RemoveAt(EntityBoxList.SelectedIndex);
-            }
+            EntityBoxList.Items.RemoveAt(EntityBoxList.SelectedIndex);
         }
 
         private void DeleteEntitiesByClassname(object sender, RoutedEventArgs e)
@@ -53,81 +51,87 @@ namespace CoD_BSP_Editor
         private void RenameSelectedEntity(object sender, RoutedEventArgs e)
         {
             if (bsp == null) return;
+            if (EntityBoxList.SelectedIndex == -1) return;
 
-            if (EntityBoxList.SelectedIndex != -1)
-            {
-                Entity ent = EntityBoxList.Items[EntityBoxList.SelectedIndex] as Entity;
+            Entity ent = EntityBoxList.Items[EntityBoxList.SelectedIndex] as Entity;
 
-                InputDialogWindow input = new InputDialogWindow("Rename entity", "Rename entity", ent.Classname);
-                input.ShowDialog();
+            InputDialogWindow input = new InputDialogWindow("Rename entity", "Rename entity", ent.Classname);
+            input.ShowDialog();
 
-                string newClassname = input.GetValue();
+            string newClassname = input.GetValue();
 
-                if (newClassname == null || newClassname == ent.Classname) return;
+            if (newClassname == null || newClassname == ent.Classname) return;
 
-                ent.Classname = newClassname;
-                EntityBoxList.Items.Refresh();
+            ent.Classname = newClassname;
+            EntityBoxList.Items.Refresh();
 
-                UpdateCurrentEntityText();
-            }
+            UpdateCurrentEntityText();
         }
 
         private void RenameEntitiesByClassname(object sender, RoutedEventArgs e)
         {
             if (bsp == null) return;
+            if (EntityBoxList.SelectedIndex == -1) return;
 
-            if (EntityBoxList.SelectedIndex != -1)
+            Entity selected = EntityBoxList.Items[EntityBoxList.SelectedIndex] as Entity;
+            string classname = selected.Classname;
+
+            InputDialogWindow input = new InputDialogWindow("Rename entities", $"Rename all of type '{classname}'", classname);
+            input.ShowDialog();
+
+            string newClassname = input.GetValue();
+
+            if (newClassname == null || newClassname == classname) return;
+
+            int renamed = 0;
+            foreach (object obj in EntityBoxList.Items)
             {
-                Entity selected = EntityBoxList.Items[EntityBoxList.SelectedIndex] as Entity;
-                string classname = selected.Classname;
-
-                InputDialogWindow input = new InputDialogWindow("Rename entities", $"Rename all of type '{classname}'", classname);
-                input.ShowDialog();
-
-                string newClassname = input.GetValue();
-
-                if (newClassname == null || newClassname == classname) return;
-
-                int renamed = 0;
-                foreach (object obj in EntityBoxList.Items)
+                if (obj is Entity)
                 {
-                    if (obj is Entity)
+                    Entity ent = obj as Entity;
+                    if (ent.Classname == classname)
                     {
-                        Entity ent = obj as Entity;
-                        if (ent.Classname == classname)
-                        {
-                            ent.Classname = newClassname;
-                            renamed++;
-                        }
+                        ent.Classname = newClassname;
+                        renamed++;
                     }
                 }
-
-                EntityBoxList.Items.Refresh();
-                UpdateCurrentEntityText();
-
-                MessageBox.Show($"Renamed {renamed} entities");
             }
+
+            EntityBoxList.Items.Refresh();
+            UpdateCurrentEntityText();
+
+            MessageBox.Show($"Renamed {renamed} entities");
+        }
+
+        private void ShowAsText(object sender, RoutedEventArgs e)
+        {
+            if (bsp == null) return;
+            if (EntityBoxList.SelectedIndex == -1) return;
+
+            Entity selected = EntityBoxList.Items[EntityBoxList.SelectedIndex] as Entity;
+
+            EntityTextWindow wnd = new EntityTextWindow();
+            wnd.EntityText.Text = selected.WriteEntity();
+            wnd.Show();
         }
 
         private void DuplicateSelectedEntity(object sender, RoutedEventArgs e)
         {
             if (bsp == null) return;
+            if (EntityBoxList.SelectedIndex == -1) return;
 
-            if (EntityBoxList.SelectedIndex != -1)
-            {
-                Entity original = EntityBoxList.Items[EntityBoxList.SelectedIndex] as Entity;
+            Entity original = EntityBoxList.Items[EntityBoxList.SelectedIndex] as Entity;
 
-                InputDialogWindow input = new InputDialogWindow("Duplicate entity", "Name duplicated entity", original.Classname);
-                input.ShowDialog();
+            InputDialogWindow input = new InputDialogWindow("Duplicate entity", "Name duplicated entity", original.Classname);
+            input.ShowDialog();
 
-                string newClassname = input.GetValue();
-                if (newClassname == null) return;
+            string newClassname = input.GetValue();
+            if (newClassname == null) return;
 
-                Entity copy = original.DeepCopy();
-                copy.Classname = newClassname;
+            Entity copy = original.DeepCopy();
+            copy.Classname = newClassname;
 
-                AddEntity(copy);
-            }
+            AddEntity(copy);
         }
     }
 }
