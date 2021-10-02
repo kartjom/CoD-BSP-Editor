@@ -28,9 +28,9 @@ namespace CoD_BSP_Editor
             this.KeyDown += ConfirmWithEnter;
         }
 
-        public (string, string, string) GetValues()
+        public (string, string, string, string) GetValues()
         {
-            return (ClassnameInput.Text, KeyValueInput.Text, ReplaceInput.Text);
+            return (ClassnameInput.Text, KeyValueInput.Text, NewClassnameInput.Text, ReplaceInput.Text);
         }
 
         private void Confirm()

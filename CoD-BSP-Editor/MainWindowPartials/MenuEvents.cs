@@ -320,7 +320,7 @@ namespace CoD_BSP_Editor
 
             if (wnd.IsConfirmed == false) return;
 
-            var (Classname, WantedStr, ReplaceStr) = wnd.GetValues();
+            var (Classname, WantedStr, NewClassname, ReplaceStr) = wnd.GetValues();
 
             if (string.IsNullOrEmpty(Classname) || string.IsNullOrEmpty(WantedStr) || string.IsNullOrEmpty(ReplaceStr))
             {
@@ -363,6 +363,11 @@ namespace CoD_BSP_Editor
                     {
                         if (KeyValue.Key == WantedKeyValue.Key && KeyValue.Value == WantedKeyValue.Value)
                         {
+                            if (string.IsNullOrEmpty(NewClassname) == false)
+                            {
+                                ent.Classname = NewClassname;
+                            }
+
                             ent.KeyValues[index] = ReplaceKeyValue;
                             replaced++;
                             break;
@@ -373,6 +378,7 @@ namespace CoD_BSP_Editor
                 }
             }
 
+            EntityBoxList.Items.Refresh();
             CreateEditView();
             MessageBox.Show($"Replaced {replaced} occurences");
         }
