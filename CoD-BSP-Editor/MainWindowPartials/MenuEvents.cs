@@ -213,35 +213,46 @@ namespace CoD_BSP_Editor
 
             LastFindByClassnameString = classname;
 
-            bool containsSearch = classname.EndsWith("*");
-            classname = classname.TrimEnd('*');
+            /* Deciding which method to use */
+            bool exactSearch = classname.StartsWith('*') == false && classname.EndsWith('*') == false;
+            bool startsWithSearch = classname.StartsWith('*') == false && classname.EndsWith('*') == true;
+            bool endsWithSearch = classname.StartsWith('*') == true && classname.EndsWith('*') == false;
+            bool containsSearch = classname.StartsWith('*') == true && classname.EndsWith('*') == true;
+
+            classname = classname.Trim('*');
 
             for (int i = EntityBoxList.SelectedIndex + 1; i < EntityBoxList.Items.Count; i++)
             {
                 if (EntityBoxList.Items[i] is Entity)
                 {
                     Entity ent = EntityBoxList.Items[i] as Entity;
+                    bool IsWanted = false;
 
-                    if (containsSearch)
+                    if (exactSearch && ent.Classname == classname)
                     {
-                        if (ent.Classname.StartsWith(classname))
-                        {
-                            EntityBoxList.SelectedIndex = EntityBoxList.Items.IndexOf(ent);
-                            EntityBoxList.ScrollIntoView(ent);
-
-                            return;
-                        }
+                        IsWanted = true;
                     }
-                    else
+                    else if (startsWithSearch && ent.Classname.StartsWith(classname))
                     {
-                        if (ent.Classname == classname)
-                        {
-                            EntityBoxList.SelectedIndex = EntityBoxList.Items.IndexOf(ent);
-                            EntityBoxList.ScrollIntoView(ent);
-
-                            return;
-                        }
+                        IsWanted = true;
                     }
+                    else if (endsWithSearch && ent.Classname.EndsWith(classname))
+                    {
+                        IsWanted = true;
+                    }
+                    else if (containsSearch && ent.Classname.Contains(classname))
+                    {
+                        IsWanted = true;
+                    }
+
+                    if (IsWanted)
+                    {
+                        EntityBoxList.SelectedIndex = EntityBoxList.Items.IndexOf(ent);
+                        EntityBoxList.ScrollIntoView(ent);
+
+                        return;
+                    }
+
                 }
             }
 
