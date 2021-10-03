@@ -19,28 +19,26 @@ namespace CoD_BSP_Editor
     /// </summary>
     public partial class InputDialogWindow : Window
     {
-        private bool IsConfirmed = false;
+        public bool IsConfirmed = false;
+        public bool ConfirmWithEnter = true;
 
-        public InputDialogWindow(string title, string promptText, string inputDefaultValue = "", bool confirmWithEnter = true)
+        public InputDialogWindow(string title, string labelValue = "", string inputValue = "")
         {
             InitializeComponent();
 
             this.Title = title;
-            this.PromptText.Text = promptText;
-            this.ValueTextBox.Text = inputDefaultValue;
+            this.KeyDown += ConfirmWithEnterEvent;
 
-            this.ValueTextBox.Focus();
-            this.ValueTextBox.SelectionStart = this.ValueTextBox.Text.Length;
+            this.FirstLabel.Text = labelValue;
+            this.FirstInput.Text = inputValue;
 
-            if (confirmWithEnter)
-            {
-                this.KeyDown += ConfirmWithEnter;
-            }
+            this.FirstInput.Focus();
+            this.FirstInput.SelectionStart = int.MaxValue;
         }
 
         public string GetValue()
         {
-            return ValueTextBox != null && IsConfirmed ? ValueTextBox.Text : null;
+            return FirstInput.Text;
         }
 
         private void Confirm()
@@ -54,8 +52,10 @@ namespace CoD_BSP_Editor
             Confirm();
         }
 
-        private void ConfirmWithEnter(object sender, KeyEventArgs e)
+        private void ConfirmWithEnterEvent(object sender, KeyEventArgs e)
         {
+            if (this.ConfirmWithEnter == false) return;
+
             if (e.Key == Key.Return)
             {
                 this.Confirm();

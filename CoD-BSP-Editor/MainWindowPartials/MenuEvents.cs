@@ -111,17 +111,23 @@ namespace CoD_BSP_Editor
         {
             if (bsp == null) return;
 
-            InputDialogWindow input = new InputDialogWindow("Add by string", "Enter entities string", LastFindByClassnameString, false);
+            InputDialogWindow input = new("Add by string", "Enter entities string");
             input.Height = 600;
             input.Width = 600;
             input.Container.Width = 500;
-            input.ValueTextBox.Height = 400;
-            input.ValueTextBox.Width = 500;
-            input.ValueTextBox.AcceptsReturn = true;
+            input.FirstInput.Height = 400;
+            input.FirstInput.Width = 500;
+            input.ConfirmWithEnter = false;
+            input.FirstInput.AcceptsReturn = true;
             input.ShowDialog();
 
+            if (input.IsConfirmed == false) return;
             string entitiesString = input.GetValue();
-            if (entitiesString == null) return;
+
+            if (string.IsNullOrEmpty(entitiesString))
+            {
+                MessageBox.Show("Value cannot be empty"); return;
+            }
 
             try
             {
@@ -154,18 +160,24 @@ namespace CoD_BSP_Editor
                 "{\n\"classname\" \"mp_ctf_intermission\"\n\"origin\" \"0 0 0\"\n}",
             };
 
-            InputDialogWindow input = new InputDialogWindow("Add by string", "Enter entities string", LastFindByClassnameString, false);
+            InputDialogWindow input = new("Add by string", "Enter entities string");
             input.Height = 600;
             input.Width = 600;
             input.Container.Width = 500;
-            input.ValueTextBox.Height = 400;
-            input.ValueTextBox.Width = 500;
-            input.ValueTextBox.AcceptsReturn = true;
-            input.ValueTextBox.Text = string.Join('\n', defaultEntsList);
+            input.FirstInput.Height = 400;
+            input.FirstInput.Width = 500;
+            input.ConfirmWithEnter = false;
+            input.FirstInput.AcceptsReturn = true;
+            input.FirstInput.Text = string.Join('\n', defaultEntsList);
             input.ShowDialog();
 
+            if (input.IsConfirmed == false) return;
             string entitiesString = input.GetValue();
-            if (entitiesString == null) return;
+
+            if (string.IsNullOrEmpty(entitiesString))
+            {
+                MessageBox.Show("Value cannot be empty"); return;
+            }
 
             try
             {
@@ -191,8 +203,13 @@ namespace CoD_BSP_Editor
             InputDialogWindow input = new InputDialogWindow("Find by classname", "Enter classname", LastFindByClassnameString);
             input.ShowDialog();
 
+            if (input.IsConfirmed == false) return;
+
             string classname = input.GetValue();
-            if (classname == null) return;
+            if (string.IsNullOrEmpty(classname))
+            {
+                MessageBox.Show("Classname cannot be empty"); return;
+            }
 
             LastFindByClassnameString = classname;
 
@@ -238,8 +255,13 @@ namespace CoD_BSP_Editor
             InputDialogWindow input = new InputDialogWindow("Find by key value pair", "Enter key value separated by space", LastFindByKeyValueString);
             input.ShowDialog();
 
+            if (input.IsConfirmed == false) return;
+
             string keyValueString = input.GetValue();
-            if (keyValueString == null) return;
+            if (keyValueString == null)
+            {
+                MessageBox.Show("Value cannot be empty"); return;
+            }
 
             string[] KeyValue = keyValueString.Split(" ");
             if (KeyValue.Length != 2)
@@ -279,8 +301,13 @@ namespace CoD_BSP_Editor
             InputDialogWindow input = new InputDialogWindow("Create new entity", "Enter classname");
             input.ShowDialog();
 
+            if (input.IsConfirmed == false) return;
+
             string classname = input.GetValue();
-            if (classname == null) return;
+            if (string.IsNullOrEmpty(classname))
+            {
+                MessageBox.Show("Classname cannot be empty"); return;
+            }
 
             Entity newEntity = new Entity(classname);
             AddEntity(newEntity);
@@ -390,8 +417,13 @@ namespace CoD_BSP_Editor
             InputDialogWindow input = new InputDialogWindow("Remove by origin", "Syntax: operator x y z");
             input.ShowDialog();
 
+            if (input.IsConfirmed == false) return;
+
             string inputString = input.GetValue();
-            if (inputString == null) return;
+            if (string.IsNullOrEmpty(inputString))
+            {
+                MessageBox.Show("Value cannot be null"); return;
+            }
 
             char charOperator;
             int x, y, z;

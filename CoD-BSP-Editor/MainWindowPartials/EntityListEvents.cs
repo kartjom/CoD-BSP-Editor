@@ -55,12 +55,18 @@ namespace CoD_BSP_Editor
 
             Entity ent = EntityBoxList.Items[EntityBoxList.SelectedIndex] as Entity;
 
-            InputDialogWindow input = new InputDialogWindow("Rename entity", "Rename entity", ent.Classname);
+            InputDialogWindow input = new("Rename entity", "Rename entity:", ent.Classname);
             input.ShowDialog();
 
-            string newClassname = input.GetValue();
+            if (input.IsConfirmed == false) return;
 
-            if (newClassname == null || newClassname == ent.Classname) return;
+            string newClassname = input.GetValue();
+            if (newClassname == ent.Classname) return;
+
+            if (string.IsNullOrEmpty(newClassname))
+            {
+                MessageBox.Show("Classname cannot be empty"); return;
+            }
 
             ent.Classname = newClassname;
             EntityBoxList.Items.Refresh();
@@ -76,12 +82,18 @@ namespace CoD_BSP_Editor
             Entity selected = EntityBoxList.Items[EntityBoxList.SelectedIndex] as Entity;
             string classname = selected.Classname;
 
-            InputDialogWindow input = new InputDialogWindow("Rename entities", $"Rename all of type '{classname}'", classname);
+            InputDialogWindow input = new("Rename entities", $"Rename all of type '{classname}':", classname);
             input.ShowDialog();
 
-            string newClassname = input.GetValue();
+            if (input.IsConfirmed == false) return;
 
-            if (newClassname == null || newClassname == classname) return;
+            string newClassname = input.GetValue();
+            if (newClassname == classname) return;
+
+            if (string.IsNullOrEmpty(newClassname))
+            {
+                MessageBox.Show("Classname cannot be empty"); return;
+            }
 
             int renamed = 0;
             foreach (object obj in EntityBoxList.Items)
@@ -122,11 +134,16 @@ namespace CoD_BSP_Editor
 
             Entity original = EntityBoxList.Items[EntityBoxList.SelectedIndex] as Entity;
 
-            InputDialogWindow input = new InputDialogWindow("Duplicate entity", "Name duplicated entity", original.Classname);
+            InputDialogWindow input = new("Duplicate entity", "Name duplicated entity:", original.Classname);
             input.ShowDialog();
 
+            if (input.IsConfirmed == false) return;
+
             string newClassname = input.GetValue();
-            if (newClassname == null) return;
+            if (string.IsNullOrEmpty(newClassname))
+            {
+                MessageBox.Show("Classname cannot be empty"); return;
+            }
 
             Entity copy = original.DeepCopy();
             copy.Classname = newClassname;
