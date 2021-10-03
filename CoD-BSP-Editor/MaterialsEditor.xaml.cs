@@ -158,7 +158,7 @@ namespace CoD_BSP_Editor
             material = material.Trim('*');
 
             int startIndex = int.Parse(startIndexStr);
-            for (int i = startIndex; i < MainWindow.bsp.Shaders.Count; i++)
+            for (int i = startIndex + 1; i < MainWindow.bsp.Shaders.Count; i++)
             {
                 string shaderName = ShaderUtils.GetMaterial(MainWindow.bsp.Shaders[i]);
                 int foundAt = -1;
