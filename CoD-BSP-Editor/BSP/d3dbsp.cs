@@ -14,8 +14,11 @@ namespace CoD_BSP_Editor.BSP
         public Lump[] Lumps = new Lump[33];
         public List<byte[]> BinaryLumps = new List<byte[]>();
 
-        public List<Entity> Entities { get; set; }
         public List<Shader> Shaders { get; set; }
+        public List<BrushSides> BrushSides { get; set; }
+        public List<Brush> Brushes { get; set; }
+        public List<Model> Models { get; set; }
+        public List<Entity> Entities { get; set; }
 
         public string FilePath { get; set; }
         public string FileName { get; set; }
@@ -31,8 +34,7 @@ namespace CoD_BSP_Editor.BSP
             this.CorrectLumpsLength();
             this.LoadLumpsData();
 
-            this.ParseShadersLumpToList();
-            this.ParseStringEntityLumpToList();
+            this.ParseLumpsDataToLists();
         }
 
         private void LoadLumpsInfo()
@@ -77,15 +79,31 @@ namespace CoD_BSP_Editor.BSP
             }
         }
 
-        private void ParseShadersLumpToList()
+        private void ParseLumpsDataToLists()
         {
             this.Shaders = BinLib.ReadListFromByteArray<Shader>(BinaryLumps[0]);
-        }
+            this.BrushSides = BinLib.ReadListFromByteArray<BrushSides>(BinaryLumps[3]);
+            this.Brushes = BinLib.ReadListFromByteArray<Brush>(BinaryLumps[4]);
+            this.Models = BinLib.ReadListFromByteArray<Model>(BinaryLumps[27]);
 
-        private void ParseStringEntityLumpToList()
-        {
             string entData = this.EntityLumpToString();
             this.Entities = Entity.ParseEntitiesData(entData);
+        }
+
+        public byte[] ExtractCollmapData()
+        {
+            List<byte> collmapContent = new();
+            byte[] shaderContent = BinLib.ToByteArray<Shader>(this.Shaders[0]);
+            byte[] brushSidesContent = BinLib.ListToByteArray<BrushSides>(this.BrushSides);
+            byte[] brushContent = BinLib.ToByteArray<Brush>(this.Brushes[0]);
+            byte[] modelContent = BinLib.ToByteArray<Model>(this.Models[0]);
+
+            collmapContent.AddRange(shaderContent);
+            collmapContent.AddRange(brushSidesContent);
+            collmapContent.AddRange(brushContent);
+            collmapContent.AddRange(modelContent);
+
+            return collmapContent.ToArray();
         }
 
         public string EntityLumpToString()
@@ -113,10 +131,23 @@ namespace CoD_BSP_Editor.BSP
             return newLumpsData;
         }
 
-        public void UpdateShaders(List<Shader> shaders)
+        public void UpdateLumps()
         {
-            this.Shaders = shaders;
-            this.BinaryLumps[0] = BinLib.ListToByteArray<Shader>(shaders);
+            // Shaders
+            byte[] newShaders = BinLib.ListToByteArray<Shader>(this.Shaders);
+            this.BinaryLumps[0] = newShaders;
+
+            // BrushSides
+            byte[] newBrushSides = BinLib.ListToByteArray<BrushSides>(this.BrushSides);
+            this.BinaryLumps[3] = newBrushSides;
+
+            // Brushes
+            byte[] newBrushes = BinLib.ListToByteArray<Brush>(this.Brushes);
+            this.BinaryLumps[4] = newBrushes;
+
+            // Models
+            byte[] newModels = BinLib.ListToByteArray<Model>(this.Models);
+            this.BinaryLumps[27] = newModels;
         }
 
         public void UpdateEntities(List<Entity> entities)

@@ -68,9 +68,11 @@ namespace CoD_BSP_Editor
                 entityList.Add(item);
             }
 
-            /* Update lumps and create BSP */
-            bsp.UpdateShaders(bsp.Shaders);
+            /* Update lumps */
+            bsp.UpdateLumps();
             bsp.UpdateEntities(entityList);
+
+            /* Create new BSP */
             byte[] bspContent = bsp.CreateBSP();
 
             if (FileExtension == ".pk3")
@@ -347,6 +349,71 @@ namespace CoD_BSP_Editor
             }
 
             MessageBox.Show($"Removed {removed} entities");
+        }
+
+        private void ImportCollmap(object sender, RoutedEventArgs e)
+        {
+            if (bsp == null) return;
+
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "collmap file (*.collmap)|*.collmap|All files (*.*)|*.*";
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string fileName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
+
+                byte[] collmapData = File.ReadAllBytes(openFileDialog.FileName);
+                CollmapData collmap = CollmapData.ReadFromByteArray(collmapData);
+
+                /* Editing data to match the BSP's content */
+                int MaterialID = bsp.Shaders.Count;
+
+                collmap.Model.BrushesOffset = (uint)bsp.Brushes.Count;
+                collmap.Brush.MaterialID = (ushort)MaterialID;
+
+                for (int i = 0; i < 6; i++)
+                {
+                    collmap.BrushSides[i].MaterialID = (uint)MaterialID;
+                }
+
+                Entity collmapEntity = new Entity("script_vehicle_collmap")
+                {
+                    KeyValues = new()
+                    {
+                        new("model", $"*{bsp.Models.Count}"),
+                        new("targetname", $"xmodel/{fileName}"),
+                    }
+                };
+
+                bsp.Shaders.Add(collmap.Shader);
+                bsp.BrushSides.AddRange(collmap.BrushSides);
+                bsp.Brushes.Add(collmap.Brush);
+                bsp.Models.Add(collmap.Model);
+
+                // Add new entity to the list
+                EntityBoxList.Items.Add(collmapEntity);
+                EntityBoxList.Items.Refresh();
+
+                MessageBox.Show("Finished importing collmap");
+            }
+        }
+
+        private void ExportCollmap(object sender, RoutedEventArgs e)
+        {
+            if (bsp == null) return;
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "collmap file (*.collmap)|*.collmap|All files (*.*)|*.*";
+            saveFileDialog.InitialDirectory = bsp.FileDirectory;
+            saveFileDialog.FileName = Path.GetFileNameWithoutExtension(bsp.FileName) + ".collmap";
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                byte[] collmapData = bsp.ExtractCollmapData();
+                File.WriteAllBytes(saveFileDialog.FileName, collmapData);
+
+                MessageBox.Show("Finished exporting collmap");
+            }
         }
 
         private void ReplaceKeyValues(object sender, RoutedEventArgs e)
