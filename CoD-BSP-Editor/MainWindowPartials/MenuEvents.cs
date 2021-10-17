@@ -378,12 +378,6 @@ namespace CoD_BSP_Editor
                     collmap.BrushSides[i].MaterialID = (uint)MaterialID;
                 }
 
-                bsp.Shaders.Add(collmap.Shader);
-                bsp.BrushSides.AddRange(collmap.BrushSides);
-                bsp.Brushes.Add(collmap.Brush);
-                bsp.Models.Add(collmap.Model);
-
-                // Add new entity to the list
                 Entity collmapEntity = new Entity("script_vehicle_collmap")
                 {
                     KeyValues = new()
@@ -393,6 +387,12 @@ namespace CoD_BSP_Editor
                     }
                 };
 
+                bsp.Shaders.Add(collmap.Shader);
+                bsp.BrushSides.AddRange(collmap.BrushSides);
+                bsp.Brushes.Add(collmap.Brush);
+                bsp.Models.Add(collmap.Model);
+
+                // Add new entity to the list
                 EntityBoxList.Items.Add(collmapEntity);
                 EntityBoxList.Items.Refresh();
 
