@@ -429,9 +429,9 @@ namespace CoD_BSP_Editor
 
             var (ModelIndexStr, AlliesFlagPos, AxisFlagPos) = wnd.GetValues();
 
-            if (string.IsNullOrEmpty(AlliesFlagPos) || string.IsNullOrEmpty(AxisFlagPos))
+            if (string.IsNullOrEmpty(ModelIndexStr) || string.IsNullOrEmpty(AlliesFlagPos) || string.IsNullOrEmpty(AxisFlagPos))
             {
-                MessageBox.Show("Fill all required fields before submiting");
+                MessageBox.Show("Fill all fields before submiting");
                 return;
             }
 
