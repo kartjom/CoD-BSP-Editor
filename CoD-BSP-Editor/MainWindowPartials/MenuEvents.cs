@@ -367,17 +367,7 @@ namespace CoD_BSP_Editor
                 byte[] collmapData = File.ReadAllBytes(openFileDialog.FileName);
                 CollmapData collmap = CollmapData.ReadFromByteArray(collmapData);
 
-                /* Editing data to match the BSP's content */
-                int MaterialID = bsp.Shaders.Count;
-
-                collmap.Model.BrushesOffset = (uint)bsp.Brushes.Count;
-                collmap.Brush.MaterialID = (ushort)MaterialID;
-
-                for (int i = 0; i < 6; i++)
-                {
-                    collmap.BrushSides[i].MaterialID = (uint)MaterialID;
-                }
-
+                // Add new entity to the list
                 Entity collmapEntity = new Entity("script_vehicle_collmap")
                 {
                     KeyValues = new()
@@ -387,14 +377,11 @@ namespace CoD_BSP_Editor
                     }
                 };
 
-                bsp.Shaders.Add(collmap.Shader);
-                bsp.BrushSides.AddRange(collmap.BrushSides);
-                bsp.Brushes.Add(collmap.Brush);
-                bsp.Models.Add(collmap.Model);
-
-                // Add new entity to the list
                 EntityBoxList.Items.Add(collmapEntity);
                 EntityBoxList.Items.Refresh();
+
+                // Import collmap
+                bsp.ImportCollmap(collmap);
 
                 MessageBox.Show("Finished importing collmap");
             }
@@ -429,13 +416,39 @@ namespace CoD_BSP_Editor
 
             var (ModelIndexStr, AlliesFlagPos, AxisFlagPos) = wnd.GetValues();
 
-            if (string.IsNullOrEmpty(ModelIndexStr) || string.IsNullOrEmpty(AlliesFlagPos) || string.IsNullOrEmpty(AxisFlagPos))
+            if (string.IsNullOrEmpty(AlliesFlagPos) || string.IsNullOrEmpty(AxisFlagPos))
             {
-                MessageBox.Show("Fill all fields before submiting");
+                MessageBox.Show("Fill all required fields before submiting");
                 return;
             }
 
-            ModelIndexStr = '*' + ModelIndexStr.Trim('*');
+            if (string.IsNullOrEmpty(ModelIndexStr))
+            {
+                CollmapData collmap = CtfTools.CreateCollmap();
+
+                // Add new entity to the list
+                int modelIndex = bsp.Models.Count;
+                Entity collmapEntity = new Entity("script_vehicle_collmap")
+                {
+                    KeyValues = new()
+                    {
+                        new("model", $"*{modelIndex}"),
+                        new("targetname", $"ctf_flag_collisions"),
+                    }
+                };
+
+                EntityBoxList.Items.Add(collmapEntity);
+                EntityBoxList.Items.Refresh();
+
+                // Import collmap
+                bsp.ImportCollmap(collmap);
+
+                ModelIndexStr = $"*{modelIndex}";
+            }
+            else
+            {
+                ModelIndexStr = '*' + ModelIndexStr.Trim('*');
+            }
 
             string alliedEntities = CtfTools.GetAlliesFlagEntities(ModelIndexStr, AlliesFlagPos);
             string axisEntities = CtfTools.GetAxisFlagEntities(ModelIndexStr, AxisFlagPos);

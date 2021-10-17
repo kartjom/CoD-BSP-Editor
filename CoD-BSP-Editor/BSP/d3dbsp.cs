@@ -208,5 +208,23 @@ namespace CoD_BSP_Editor.BSP
             string gscContent = string.Join('\n', gscContentList);
             return gscContent;
         }
+
+        public void ImportCollmap(CollmapData collmap)
+        {
+            int MaterialID = this.Shaders.Count;
+
+            collmap.Model.BrushesOffset = (uint)this.Brushes.Count;
+            collmap.Brush.MaterialID = (ushort)MaterialID;
+
+            for (int i = 0; i < 6; i++)
+            {
+                collmap.BrushSides[i].MaterialID = (uint)MaterialID;
+            }
+
+            this.Shaders.Add(collmap.Shader);
+            this.BrushSides.AddRange(collmap.BrushSides);
+            this.Brushes.Add(collmap.Brush);
+            this.Models.Add(collmap.Model);
+        }
     }
 }

@@ -124,5 +124,37 @@ namespace CoD_BSP_Editor.GametypeTools
 
             return axisFlagEntitiesContent;
         }
+        
+        public static CollmapData CreateCollmap()
+        {
+            CollmapData collmap = new CollmapData();
+
+            collmap.Shader = ShaderUtils.Construct("textures/notexture", 0, 1);
+            collmap.Brush = new() { MaterialID = 0, Sides = 6 };
+            collmap.BrushSides = new BrushSides[6];
+
+            collmap.BrushSides[0] = new()
+            { MaterialID = 0, PlaneDistanceUnion = new byte[4] { 0, 0, 128, 194 } };     
+            collmap.BrushSides[1] = new()
+            { MaterialID = 0, PlaneDistanceUnion = new byte[4] { 0, 0, 128, 66 } };
+            collmap.BrushSides[2] = new()
+            { MaterialID = 0, PlaneDistanceUnion = new byte[4] { 0, 0, 128, 194 } };     
+            collmap.BrushSides[3] = new()
+            { MaterialID = 0, PlaneDistanceUnion = new byte[4] { 0, 0, 128, 66 } };
+            collmap.BrushSides[4] = new()
+            { MaterialID = 0, PlaneDistanceUnion = new byte[4] { 0, 0, 0, 128 } };
+            collmap.BrushSides[5] = new()
+            { MaterialID = 0, PlaneDistanceUnion = new byte[4] { 0, 0, 24, 67 } };
+
+            collmap.Model = new()
+            {
+                Position = new float[6] { -64, -64, 0, 64, 64, 152 },
+                TrianglesoupsOffset = 0, TrianglesoupsSize = 1,
+                CollisionaabbsOffset = 0, CollisionaabbsSize = 0,
+                BrushesOffset = 0, BrushesSize = 1
+            };
+
+            return collmap;
+        }
     }
 }
