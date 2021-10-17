@@ -41,6 +41,9 @@
                     <MenuItem Header="_Import collmap" Click="ImportCollmap" Padding="5" />
                     <MenuItem Header="_Export map as collmap" Click="ExportCollmap" Padding="5" />
                 </MenuItem>
+                <MenuItem Header="_Gametypes" Padding="10 8 10 8">
+                    <MenuItem Header="_Add Capture The Flag" Click="AddCTF" Padding="5" />
+                </MenuItem>
                 <MenuItem Header="_Editors" Padding="10 8 10 8">
                     <MenuItem Header="_Materials editor" Click="OpenMaterialsEditor" Padding="5" />
                 </MenuItem>

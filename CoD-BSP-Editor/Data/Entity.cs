@@ -54,7 +54,10 @@ namespace CoD_BSP_Editor.Data
         {
             List<Entity> parsedEntsList = new List<Entity>();
 
-            string normalizedStr = _entityData.Replace("\r\n", "\n").Replace("\r", "\n");
+            string normalizedStr = _entityData
+                .Replace("\r\n", "\n")
+                .Replace("\r", "\n");
+
             string[] rawEnts = normalizedStr.Split('{', '}');
 
             foreach (string raw in rawEnts)
@@ -77,7 +80,7 @@ namespace CoD_BSP_Editor.Data
 
             foreach (string line in keyValueLine)
             {
-                string trimmedLine = line.Trim('"');
+                string trimmedLine = line.Trim().Trim('\t').Trim('"');
                 string[] keyValue = trimmedLine.Split("\" \"");
 
                 if (keyValue[0] == "classname")

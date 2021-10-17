@@ -1,5 +1,6 @@
 ﻿using CoD_BSP_Editor.BSP;
 using CoD_BSP_Editor.Data;
+using CoD_BSP_Editor.GametypeTools;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -139,6 +140,7 @@ namespace CoD_BSP_Editor
                 {
                     EntityBoxList.Items.Add(newEntity);
                 }
+                EntityBoxList.Items.Refresh();
 
                 MessageBox.Show($"Added {ParsedEntities.Count} new entities");
             }
@@ -376,6 +378,12 @@ namespace CoD_BSP_Editor
                     collmap.BrushSides[i].MaterialID = (uint)MaterialID;
                 }
 
+                bsp.Shaders.Add(collmap.Shader);
+                bsp.BrushSides.AddRange(collmap.BrushSides);
+                bsp.Brushes.Add(collmap.Brush);
+                bsp.Models.Add(collmap.Model);
+
+                // Add new entity to the list
                 Entity collmapEntity = new Entity("script_vehicle_collmap")
                 {
                     KeyValues = new()
@@ -385,12 +393,6 @@ namespace CoD_BSP_Editor
                     }
                 };
 
-                bsp.Shaders.Add(collmap.Shader);
-                bsp.BrushSides.AddRange(collmap.BrushSides);
-                bsp.Brushes.Add(collmap.Brush);
-                bsp.Models.Add(collmap.Model);
-
-                // Add new entity to the list
                 EntityBoxList.Items.Add(collmapEntity);
                 EntityBoxList.Items.Refresh();
 
@@ -414,6 +416,41 @@ namespace CoD_BSP_Editor
 
                 MessageBox.Show("Finished exporting collmap");
             }
+        }
+
+        private void AddCTF(object sender, RoutedEventArgs e)
+        {
+            if (bsp == null) return;
+
+            CtfInputWindow wnd = new CtfInputWindow();
+            wnd.ShowDialog();
+
+            if (wnd.IsConfirmed == false) return;
+
+            var (ModelIndexStr, AlliesFlagPos, AxisFlagPos) = wnd.GetValues();
+
+            if (string.IsNullOrEmpty(AlliesFlagPos) || string.IsNullOrEmpty(AxisFlagPos))
+            {
+                MessageBox.Show("Fill all required fields before submiting");
+                return;
+            }
+
+            ModelIndexStr = '*' + ModelIndexStr.Trim('*');
+
+            string alliedEntities = CtfTools.GetAlliesFlagEntities(ModelIndexStr, AlliesFlagPos);
+            string axisEntities = CtfTools.GetAxisFlagEntities(ModelIndexStr, AxisFlagPos);
+
+            string allEntities = alliedEntities + '\n' + axisEntities;
+
+            List<Entity> ParsedEntities = Entity.ParseEntitiesData(allEntities);
+
+            foreach (Entity newEntity in ParsedEntities)
+            {
+                EntityBoxList.Items.Add(newEntity);
+            }
+            EntityBoxList.Items.Refresh();
+
+            MessageBox.Show("Gametype 'Capture The Flag' successfully added");
         }
 
         private void ReplaceKeyValues(object sender, RoutedEventArgs e)
