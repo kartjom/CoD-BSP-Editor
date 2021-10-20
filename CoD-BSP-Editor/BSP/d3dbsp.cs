@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -183,7 +184,7 @@ namespace CoD_BSP_Editor.BSP
                 "{",
                 $"\tmap\t\t\t\"{fileName}\"",
                 $"\tlongname\t\"{fileName}\"",
-                "\tgametype\t\"dm tdm ctf\"",
+                "\tgametype\t\"dm tdm ctf sd\"",
                 "}"
             };
 
@@ -211,7 +212,13 @@ namespace CoD_BSP_Editor.BSP
 
         public void ImportCollmap(CollmapData collmap)
         {
-            int MaterialID = this.Shaders.Count;
+            int MaterialID = this.FindMaterialIndex( ShaderUtils.GetMaterial(collmap.Shader) );
+            if (MaterialID == -1)
+            {
+                // If map does not contain such texture, create add it
+                MaterialID = this.Shaders.Count;
+                this.Shaders.Add(collmap.Shader);
+            }
 
             collmap.Model.BrushesOffset = (uint)this.Brushes.Count;
             collmap.Brush.MaterialID = (ushort)MaterialID;
@@ -221,10 +228,22 @@ namespace CoD_BSP_Editor.BSP
                 collmap.BrushSides[i].MaterialID = (uint)MaterialID;
             }
 
-            this.Shaders.Add(collmap.Shader);
             this.BrushSides.AddRange(collmap.BrushSides);
             this.Brushes.Add(collmap.Brush);
             this.Models.Add(collmap.Model);
+        }
+
+        public int FindMaterialIndex(string material)
+        {
+            for (int i = 0; i < this.Shaders.Count; i++)
+            {
+                if (ShaderUtils.GetMaterial(this.Shaders[i]) == material)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
         }
     }
 }

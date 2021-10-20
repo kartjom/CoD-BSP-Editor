@@ -32,7 +32,7 @@ namespace CoD_BSP_Editor.Data
 
         private void Initialize(Vector3 min, Vector3 max)
         {
-            if ( Vector3.Equals(Vector3.Min(min, max), max) )
+            if (Vector3.Equals(Vector3.Min(min, max), max))
             {
                 (min, max) = (max, min);
             }

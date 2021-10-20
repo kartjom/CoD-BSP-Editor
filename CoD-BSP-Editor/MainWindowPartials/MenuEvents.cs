@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -405,6 +406,79 @@ namespace CoD_BSP_Editor
             }
         }
 
+        private void CreateTrigger(object sender, RoutedEventArgs e)
+        {
+            if (bsp == null) return;
+
+            DoubleInputDialogWindow input = new("Create trigger");
+            input.FirstLabel.Text = "Bounding Box Start:";
+            input.FirstInput.Text = "0 0 0";
+            input.SecondLabel.Text = "Bounding Box End:";
+            input.SecondInput.Text = "1 1 1";
+
+            input.ShowDialog();
+
+            if (input.IsConfirmed == false) return;
+
+            var (BBoxMinStr, BBoxMaxStr) = input.GetValue();
+
+            if (string.IsNullOrEmpty(BBoxMinStr) || string.IsNullOrEmpty(BBoxMaxStr))
+            {
+                MessageBox.Show("Fill all fields before submiting");
+                return;
+            }
+
+            List<string> TriggerDistancesList = new List<string>();
+            TriggerDistancesList.AddRange(BBoxMinStr.Split(' '));
+            TriggerDistancesList.AddRange(BBoxMaxStr.Split(' '));
+
+            float[] TriggerDistances = new float[6];
+
+            try
+            {
+                for (int i = 0; i < 6; i++)
+                {
+                    TriggerDistances[i] = float.Parse(TriggerDistancesList[i]);
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Could not parse bounding box");
+                return;
+            }
+
+            Vector3 BBoxMin = new Vector3(TriggerDistances[0], TriggerDistances[1], TriggerDistances[2]);
+            Vector3 BBoxMax = new Vector3(TriggerDistances[3], TriggerDistances[4], TriggerDistances[5]);
+
+            CollmapData trigger = CollmapData.CreateTrigger(BBoxMin, BBoxMax);
+
+            // Add new entity to the list
+            int modelIndex = bsp.Models.Count;
+
+            // For printing BBoxCenter in Entity KeyValues, useful for setting up entity origin
+            Vector3 BBoxCenter = (BBoxMin + BBoxMax) / 2;
+            string BBoxCenterStr = $"{BBoxCenter.X} {BBoxCenter.Y} {BBoxCenter.Z}".Replace(',', '.');
+
+            Entity collmapEntity = new Entity("editor_trigger_info")
+            {
+                KeyValues = new()
+                {
+                    new("info_model", $"*{modelIndex}"),
+                    new("info_min", BBoxMinStr),
+                    new("info_max", BBoxMaxStr),
+                    new("info_center", BBoxCenterStr),
+                }
+            };
+
+            EntityBoxList.Items.Add(collmapEntity);
+            EntityBoxList.Items.Refresh();
+
+            // Import collmap
+            bsp.ImportCollmap(trigger);
+
+            MessageBox.Show("Trigger created successfully");
+        }
+
         private void AddCTF(object sender, RoutedEventArgs e)
         {
             if (bsp == null) return;
@@ -428,12 +502,11 @@ namespace CoD_BSP_Editor
 
                 // Add new entity to the list
                 int modelIndex = bsp.Models.Count;
-                Entity collmapEntity = new Entity("script_vehicle_collmap")
+                Entity collmapEntity = new Entity("editor_ctf_info")
                 {
                     KeyValues = new()
                     {
-                        new("model", $"*{modelIndex}"),
-                        new("targetname", $"ctf_flag_collisions"),
+                        new("info_model", $"*{modelIndex}"),
                     }
                 };
 
@@ -464,6 +537,22 @@ namespace CoD_BSP_Editor
             EntityBoxList.Items.Refresh();
 
             MessageBox.Show("Gametype 'Capture The Flag' successfully added");
+        }
+
+        private void AddSD(object sender, RoutedEventArgs e)
+        {
+            if (bsp == null) return;
+
+            string bombsiteEntitiesString = SdTools.GetBombsiteEntities();
+            List<Entity> bombsiteEntities = Entity.ParseEntitiesData(bombsiteEntitiesString);
+
+            foreach (Entity entity in bombsiteEntities)
+            {
+                EntityBoxList.Items.Add(entity);
+            }
+            EntityBoxList.Items.Refresh();
+
+            MessageBox.Show("Gametype 'Search & Destroy' successfully added");
         }
 
         private void ReplaceKeyValues(object sender, RoutedEventArgs e)
