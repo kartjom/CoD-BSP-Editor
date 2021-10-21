@@ -95,7 +95,19 @@ namespace CoD_BSP_Editor
                 string pk3FilePath = Path.Combine(SaveDirectory, FileName + ".pk3");
                 if (File.Exists(pk3FilePath))
                 {
-                    File.Delete(pk3FilePath);
+                    try
+                    {
+                        // File may be in use, app will crash and all progress will be lost
+                        File.Delete(pk3FilePath);
+                    }
+                    catch (Exception exception)
+                    {
+                        // Remove temporary remains
+                        Directory.Delete(Pk3FolderDirectory, true);
+                        
+                        MessageBox.Show(exception.Message);
+                        return;
+                    }
                 }
 
                 ZipFile.CreateFromDirectory(Pk3FolderDirectory, pk3FilePath);
