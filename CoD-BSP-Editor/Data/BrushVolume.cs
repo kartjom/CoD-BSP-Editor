@@ -32,11 +32,6 @@ namespace CoD_BSP_Editor.Data
 
         private void Initialize(Vector3 min, Vector3 max)
         {
-            if (Vector3.Equals(Vector3.Min(min, max), max))
-            {
-                (min, max) = (max, min);
-            }
-
             BBoxMin = min;
             BBoxMax = max;
 
@@ -45,6 +40,10 @@ namespace CoD_BSP_Editor.Data
             Size.X = Math.Abs(BBoxMin.X - BBoxMax.X);
             Size.Y = Math.Abs(BBoxMin.Y - BBoxMax.Y);
             Size.Z = Math.Abs(BBoxMin.Z - BBoxMax.Z);
+
+            // Recalculating the diagonal from the center
+            BBoxMin = new Vector3(Center.X - Size.X / 2, Center.Y - Size.Y / 2, Center.Z - Size.Z / 2);
+            BBoxMax = new Vector3(Center.X + Size.X / 2, Center.Y + Size.Y / 2, Center.Z + Size.Z / 2);
 
             Distances[0] = Center.X - (Size.X / 2); // Left
             Distances[1] = Center.X + (Size.X / 2); // Right
