@@ -129,7 +129,7 @@ namespace CoD_BSP_Editor.GametypeTools
         {
             CollmapData collmap = new CollmapData();
 
-            collmap.Shader = ShaderUtils.Construct("textures/notexture", 0, 1);
+            collmap.Shader = ShaderUtils.Construct("textures/common/trigger", 128, 671088641);
             collmap.Brush = new() { MaterialID = 0, Sides = 6 };
             collmap.BrushSides = new BrushSides[6];
 

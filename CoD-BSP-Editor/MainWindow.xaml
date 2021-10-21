@@ -41,7 +41,7 @@
                     <MenuItem Header="_Import collmap" Click="ImportCollmap" Padding="5" />
                     <MenuItem Header="_Export map as collmap" Click="ExportCollmap" Padding="5" />
                     <Separator/>
-                    <MenuItem Header="_Create trigger" Click="CreateTrigger" Padding="5" />
+                    <MenuItem Header="_Create brush" Click="CreateBrush" Padding="5" />
                 </MenuItem>
                 <MenuItem Header="_Gametypes" Padding="10 8 10 8">
                     <MenuItem Header="_Add Capture The Flag" Click="AddCTF" Padding="5" />

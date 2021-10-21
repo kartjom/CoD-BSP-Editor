@@ -31,7 +31,7 @@ namespace CoD_BSP_Editor.Data
             return collmap;
         }
 
-        public static CollmapData CreateTrigger(Vector3 BBoxMin, Vector3 BBoxMax, Shader? Texture = null)
+        public static CollmapData CreateBrush(Vector3 BBoxMin, Vector3 BBoxMax, Shader? Texture = null)
         {
             CollmapData collmap = new CollmapData();
             BrushVolume brush = new BrushVolume(BBoxMin, BBoxMax);
