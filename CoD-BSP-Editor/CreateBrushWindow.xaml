@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CoD_BSP_Editor"
         mc:Ignorable="d"
-        Title="Create brush" Height="375" Width="500" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+        Title="Create brush" Height="400" Width="500" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
     <Grid>
         <StackPanel VerticalAlignment="Center" Width="350">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -19,6 +19,11 @@
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 10 0 0">
                 <TextBlock Height="25" FontSize="18">Shader:</TextBlock>
                 <TextBox x:Name="ShaderName" Width="350" FontSize="18" Margin="0 10 0 10" Text="textures/common/trigger"/>
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0 20 0 10">
+                <CheckBox x:Name="IsStatic" VerticalAlignment="Center" VerticalContentAlignment="Center">
+                    <TextBlock Text="Make static" VerticalAlignment="Center" Height="25" FontSize="18" />
+                </CheckBox>
             </StackPanel>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Button Content="Confirm" Click="OnConfirm" FontSize="18" Width="100" Padding="5" Margin="0 20 0 20"/>

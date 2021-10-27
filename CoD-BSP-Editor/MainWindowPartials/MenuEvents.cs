@@ -429,7 +429,7 @@ namespace CoD_BSP_Editor
 
             if (input.IsConfirmed == false) return;
 
-            var (BBoxMinStr, BBoxMaxStr, ShaderName) = input.GetValues();
+            var (BBoxMinStr, BBoxMaxStr, ShaderName, IsStatic) = input.GetValues();
 
             if (string.IsNullOrEmpty(BBoxMinStr) || string.IsNullOrEmpty(BBoxMaxStr) || string.IsNullOrEmpty(ShaderName))
             {
@@ -462,24 +462,44 @@ namespace CoD_BSP_Editor
             Shader brushShader = ShaderUtils.Construct(ShaderName, 128, 671088641);
             CollmapData brush = CollmapData.CreateBrush(BBoxMin, BBoxMax, brushShader);
 
-            // Add new entity to the list
-            int modelIndex = bsp.Models.Count;
 
             // For printing BBoxCenter in Entity KeyValues, useful for setting up entity origin
             Vector3 BBoxCenter = (BBoxMin + BBoxMax) / 2;
             string BBoxCenterStr = $"{BBoxCenter.X} {BBoxCenter.Y} {BBoxCenter.Z}".Replace(',', '.');
 
-            Entity collmapEntity = new Entity("editor_brush_info")
+            // Add new entity to the list
+            Entity collmapEntity;
+
+            int modelIndex = bsp.Models.Count;
+
+            if (IsStatic)
             {
-                KeyValues = new()
+                collmapEntity = new Entity("func_static")
                 {
-                    new("info_model", $"*{modelIndex}"),
-                    new("info_min", BBoxMinStr),
-                    new("info_max", BBoxMaxStr),
-                    new("info_center", BBoxCenterStr),
-                    new("info_shader", ShaderUtils.GetMaterial(brush.Shader)),
-                }
-            };
+                    KeyValues = new()
+                    {
+                        new("model", $"*{modelIndex}"),
+                        new("info_min", BBoxMinStr),
+                        new("info_max", BBoxMaxStr),
+                        new("info_center", BBoxCenterStr),
+                        new("info_shader", ShaderUtils.GetMaterial(brush.Shader)),
+                    }
+                };
+            }
+            else
+            {
+                collmapEntity = new Entity("editor_brush_info")
+                {
+                    KeyValues = new()
+                    {
+                        new("info_model", $"*{modelIndex}"),
+                        new("info_min", BBoxMinStr),
+                        new("info_max", BBoxMaxStr),
+                        new("info_center", BBoxCenterStr),
+                        new("info_shader", ShaderUtils.GetMaterial(brush.Shader)),
+                    }
+                };
+            }
 
             EntityBoxList.Items.Add(collmapEntity);
             EntityBoxList.Items.Refresh();

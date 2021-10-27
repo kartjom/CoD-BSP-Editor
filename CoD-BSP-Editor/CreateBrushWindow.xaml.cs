@@ -28,9 +28,9 @@ namespace CoD_BSP_Editor
             this.KeyDown += ConfirmWithEnter;
         }
 
-        public (string, string, string) GetValues()
+        public (string, string, string, bool) GetValues()
         {
-            return (BBoxStart.Text, BBoxEnd.Text, ShaderName.Text);
+            return (BBoxStart.Text, BBoxEnd.Text, ShaderName.Text, IsStatic.IsChecked ?? false);
         }
 
         private void Confirm()
