@@ -21,11 +21,12 @@ namespace CoD_BSP_Editor.Data
     {
         public static string GetMaterial(Shader shader)
         {
-            return new string(shader.Material).Trim('\0');
+            return new string(shader.Material).Trim('\0').ToLower();
         }
 
         public static Shader Construct(string _newMaterial, uint _flag1 = 0, uint _flag2 = 0)
         {
+            _newMaterial = _newMaterial.ToLower();
             StringBuilder matBuilder = new StringBuilder(_newMaterial).Append('\0', 64 - _newMaterial.Length);
 
             return new Shader()

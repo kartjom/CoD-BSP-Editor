@@ -30,7 +30,12 @@ namespace CoD_BSP_Editor
 
         public (string, string, string, string) GetValues()
         {
-            return (ClassnameInput.Text, KeyValueInput.Text, NewClassnameInput.Text, ReplaceInput.Text);
+            return (
+                ClassnameInput.Text?.ToLower().Trim(),
+                KeyValueInput.Text?.ToLower().Trim(),
+                NewClassnameInput.Text?.ToLower().Trim(),
+                ReplaceInput.Text?.ToLower().Trim()
+            );
         }
 
         private void Confirm()

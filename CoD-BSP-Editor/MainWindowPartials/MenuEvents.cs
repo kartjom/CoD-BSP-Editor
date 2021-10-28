@@ -228,6 +228,7 @@ namespace CoD_BSP_Editor
                 MessageBox.Show("Classname cannot be empty"); return;
             }
 
+            classname = classname.ToLower().Trim();
             LastFindByClassnameString = classname;
 
             /* Deciding which method to use */
@@ -243,21 +244,23 @@ namespace CoD_BSP_Editor
                 if (EntityBoxList.Items[i] is Entity)
                 {
                     Entity ent = EntityBoxList.Items[i] as Entity;
+                    string entClassname = ent.Classname.ToLower();
+
                     bool IsWanted = false;
 
-                    if (exactSearch && ent.Classname == classname)
+                    if (exactSearch && entClassname == classname)
                     {
                         IsWanted = true;
                     }
-                    else if (startsWithSearch && ent.Classname.StartsWith(classname))
+                    else if (startsWithSearch && entClassname.StartsWith(classname))
                     {
                         IsWanted = true;
                     }
-                    else if (endsWithSearch && ent.Classname.EndsWith(classname))
+                    else if (endsWithSearch && entClassname.EndsWith(classname))
                     {
                         IsWanted = true;
                     }
-                    else if (containsSearch && ent.Classname.Contains(classname))
+                    else if (containsSearch && entClassname.Contains(classname))
                     {
                         IsWanted = true;
                     }
@@ -291,17 +294,28 @@ namespace CoD_BSP_Editor
                 MessageBox.Show("Value cannot be empty"); return;
             }
 
-            string[] KeyValue = keyValueString.Split(" ");
-            if (KeyValue.Length != 2)
+            keyValueString = keyValueString.ToLower().Trim();
+            LastFindByKeyValueString = keyValueString;
+
+            string Key, Value;
+
+            try
+            {
+                int spaceIndex = keyValueString.IndexOf(' ');
+
+                if (spaceIndex == -1)
+                {
+                    throw new Exception();
+                }
+
+                Key = keyValueString.Substring(0, spaceIndex).Trim();
+                Value = keyValueString.Substring(spaceIndex).Trim();
+            }
+            catch
             {
                 MessageBox.Show("Invalid format for key value pair");
                 return;
             }
-
-            LastFindByKeyValueString = keyValueString;
-
-            string Key = KeyValue[0];
-            string Value = KeyValue[1];
 
             for (int i = EntityBoxList.SelectedIndex + 1; i < EntityBoxList.Items.Count; i++)
             {
@@ -309,7 +323,7 @@ namespace CoD_BSP_Editor
                 {
                     Entity ent = EntityBoxList.Items[i] as Entity;
 
-                    if (ent.HasKey(Key) && ent.GetValue(Key) == Value)
+                    if (ent.HasKey(Key) && ent.GetValue(Key).ToLower() == Value)
                     {
                         EntityBoxList.SelectedIndex = EntityBoxList.Items.IndexOf(ent);
                         EntityBoxList.ScrollIntoView(ent);
@@ -461,7 +475,6 @@ namespace CoD_BSP_Editor
 
             Shader brushShader = ShaderUtils.Construct(ShaderName, 128, 671088641);
             CollmapData brush = CollmapData.CreateBrush(BBoxMin, BBoxMax, brushShader);
-
 
             // For printing BBoxCenter in Entity KeyValues, useful for setting up entity origin
             Vector3 BBoxCenter = (BBoxMin + BBoxMax) / 2;
@@ -631,15 +644,16 @@ namespace CoD_BSP_Editor
             for (int i = 0; i < EntityBoxList.Items.Count; i++)
             {
                 Entity ent = EntityBoxList.Items[i] as Entity;
+                string entClassname = ent.Classname.ToLower();
 
-                if (ent.Classname == Classname || Classname == "*")
+                if (entClassname == Classname || Classname == "*")
                 {
                     if (ent.HasKey(WantedKeyValue.Key) == false) continue;
 
                     int index = 0;
                     foreach (var KeyValue in ent.KeyValues)
                     {
-                        if (KeyValue.Key == WantedKeyValue.Key && KeyValue.Value == WantedKeyValue.Value)
+                        if (KeyValue.Key.ToLower() == WantedKeyValue.Key && KeyValue.Value.ToLower() == WantedKeyValue.Value)
                         {
                             if (string.IsNullOrEmpty(NewClassname) == false)
                             {

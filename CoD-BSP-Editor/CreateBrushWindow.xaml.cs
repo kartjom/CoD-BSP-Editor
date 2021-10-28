@@ -30,7 +30,12 @@ namespace CoD_BSP_Editor
 
         public (string, string, string, bool) GetValues()
         {
-            return (BBoxStart.Text, BBoxEnd.Text, ShaderName.Text, IsStatic.IsChecked ?? false);
+            return (
+                BBoxStart.Text?.ToLower().Trim(),
+                BBoxEnd.Text?.ToLower().Trim(),
+                ShaderName.Text?.ToLower().Trim(),
+                IsStatic.IsChecked ?? false
+            );
         }
 
         private void Confirm()

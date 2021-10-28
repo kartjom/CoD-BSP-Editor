@@ -145,9 +145,15 @@ namespace CoD_BSP_Editor
                 return;
             }
 
+            material = material.ToLower().Trim();
+
             if (string.IsNullOrEmpty(startIndexStr))
             {
                 startIndexStr = "0";
+            }
+            else
+            {
+                startIndexStr = startIndexStr.ToLower().Trim();
             }
 
             bool exactSearch = material.StartsWith('*') == false && material.EndsWith('*') == false;
@@ -160,7 +166,7 @@ namespace CoD_BSP_Editor
             int startIndex = int.Parse(startIndexStr);
             for (int i = startIndex; i < MainWindow.bsp.Shaders.Count; i++)
             {
-                string shaderName = ShaderUtils.GetMaterial(MainWindow.bsp.Shaders[i]);
+                string shaderName = ShaderUtils.GetMaterial(MainWindow.bsp.Shaders[i]).ToLower();
                 int foundAt = -1;
 
                 if (exactSearch && shaderName == material)

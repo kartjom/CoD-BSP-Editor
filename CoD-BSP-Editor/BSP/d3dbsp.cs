@@ -235,9 +235,12 @@ namespace CoD_BSP_Editor.BSP
 
         public int FindMaterialIndex(string material)
         {
+            material = material.ToLower();
+
             for (int i = 0; i < this.Shaders.Count; i++)
             {
-                if (ShaderUtils.GetMaterial(this.Shaders[i]) == material)
+                string shader = ShaderUtils.GetMaterial(this.Shaders[i]).ToLower();
+                if (shader == material)
                 {
                     return i;
                 }

@@ -104,9 +104,11 @@ namespace CoD_BSP_Editor.Data
 
         public bool HasKey(string keyName)
         {
+            keyName = keyName.ToLower();
+
             foreach (var field in this.KeyValues)
             {
-                if (field.Key == keyName)
+                if (field.Key.ToLower() == keyName)
                 {
                     return true;
                 }
@@ -117,9 +119,11 @@ namespace CoD_BSP_Editor.Data
 
         public string GetValue(string keyName)
         {
+            keyName = keyName.ToLower();
+
             foreach (var field in this.KeyValues)
             {
-                if (field.Key == keyName)
+                if (field.Key.ToLower() == keyName)
                 {
                     return field.Value;
                 }
