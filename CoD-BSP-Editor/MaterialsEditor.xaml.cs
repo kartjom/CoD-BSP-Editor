@@ -33,12 +33,12 @@ namespace CoD_BSP_Editor
             int index = 0;
             foreach (Shader shader in MainWindow.bsp.Shaders)
             {
-                this.CreateEditField(index, shader);
+                this.CreateMaterialEditField(index, shader);
                 index++;
             }
         }
 
-        private void CreateEditField(int index, Shader shader)
+        private void CreateMaterialEditField(int index, Shader shader)
         {
             Thickness Margin = new Thickness(10, 5, 10, 5);
             Thickness Padding = new Thickness(10, 5, 10, 5);

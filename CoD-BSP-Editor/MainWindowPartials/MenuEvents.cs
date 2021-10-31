@@ -770,6 +770,21 @@ namespace CoD_BSP_Editor
             editor.Show();
         }
 
+        private void OpenBrushEditor(object sender, RoutedEventArgs e)
+        {
+            if (bsp == null) return;
+
+            foreach (Window win in App.Current.Windows)
+            {
+                if (win is BrushEditor) return;
+            }
+
+            BrushEditor editor = new BrushEditor();
+            editor.Owner = this;
+            editor.Title = $"Brush editor ({bsp.FileName})";
+            editor.Show();
+        }
+
         private void ShowLumpInfo(object sender, RoutedEventArgs e)
         {
             if (bsp == null || bsp.Lumps == null) return;

@@ -31,7 +31,7 @@ namespace CoD_BSP_Editor
 
         public (string, string) GetValue()
         {
-            return (FirstInput.Text, SecondInput.Text);
+            return (FirstInput.Text.Trim(), SecondInput.Text.Trim());
         }
 
         private void Confirm()

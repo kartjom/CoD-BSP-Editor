@@ -16,6 +16,7 @@ namespace CoD_BSP_Editor.BSP
         public List<byte[]> BinaryLumps = new List<byte[]>();
 
         public List<Shader> Shaders { get; set; }
+        public List<Plane> Planes { get; set; }
         public List<BrushSides> BrushSides { get; set; }
         public List<Brush> Brushes { get; set; }
         public List<Model> Models { get; set; }
@@ -83,6 +84,7 @@ namespace CoD_BSP_Editor.BSP
         private void ParseLumpsDataToLists()
         {
             this.Shaders = BinLib.ReadListFromByteArray<Shader>(BinaryLumps[0]);
+            this.Planes = BinLib.ReadListFromByteArray<Plane>(BinaryLumps[2]);
             this.BrushSides = BinLib.ReadListFromByteArray<BrushSides>(BinaryLumps[3]);
             this.Brushes = BinLib.ReadListFromByteArray<Brush>(BinaryLumps[4]);
             this.Models = BinLib.ReadListFromByteArray<Model>(BinaryLumps[27]);
@@ -137,6 +139,10 @@ namespace CoD_BSP_Editor.BSP
             // Shaders
             byte[] newShaders = BinLib.ListToByteArray<Shader>(this.Shaders);
             this.BinaryLumps[0] = newShaders;
+
+            // Planes
+            byte[] newPlanes = BinLib.ListToByteArray<Plane>(this.Planes);
+            this.BinaryLumps[2] = newPlanes;
 
             // BrushSides
             byte[] newBrushSides = BinLib.ListToByteArray<BrushSides>(this.BrushSides);
@@ -247,6 +253,22 @@ namespace CoD_BSP_Editor.BSP
             }
 
             return -1;
+        }
+
+        public int FindBrushSidesOffset(int brushIndex)
+        {
+            if (brushIndex > Brushes.Count)
+            {
+                return -1;
+            }
+
+            int brushSidesOffset = 0;
+            for (int i = 0; i < brushIndex; i++)
+            {
+                brushSidesOffset += Brushes[i].Sides;
+            }
+
+            return brushSidesOffset;
         }
     }
 }
