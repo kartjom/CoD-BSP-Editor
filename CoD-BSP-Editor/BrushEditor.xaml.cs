@@ -56,14 +56,11 @@ namespace CoD_BSP_Editor
         {
             foreach (BrushInfo brushInfo in this.BrushData)
             {
-                Brush brush = brushInfo.GetBrush();
-                List<BrushSides> sides = brushInfo.GetSides();
-
-                this.CreateBrushEditField(brushInfo.Index, brush, sides);
+                this.CreateBrushEditField(brushInfo.Index);
             }
         }
 
-        private void CreateBrushEditField(int index, Brush brush, List<BrushSides> brushSides)
+        private void CreateBrushEditField(int index)
         {
             Expander brushSectionExpander = new Expander()
             {
@@ -76,6 +73,19 @@ namespace CoD_BSP_Editor
             };
 
             BrushFields.Children.Add(brushSectionExpander);
+
+            brushSectionExpander.Expanded += OnFirstExpand;
+        }
+
+        private void OnFirstExpand(object sender, RoutedEventArgs e)
+        {
+            Expander brushSectionExpander = (Expander)sender;
+            brushSectionExpander.Expanded -= OnFirstExpand;
+
+            int index = (int)brushSectionExpander.Tag;
+
+            Brush brush = BrushData[index].GetBrush();
+            List<BrushSides> brushSides = BrushData[index].GetSides();
 
             /* It will hold the brush data */
             StackPanel brushDataContainer = new StackPanel()
