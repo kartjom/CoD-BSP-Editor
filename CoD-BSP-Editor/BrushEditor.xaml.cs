@@ -32,6 +32,7 @@ namespace CoD_BSP_Editor
 
         private List<BrushInfo> BrushData = new();
 
+        private string LastFindBrushOrigin = "0 0 0";
         public BrushEditor()
         {
             InitializeComponent();
@@ -324,7 +325,7 @@ namespace CoD_BSP_Editor
 
             DoubleInputDialogWindow wndDialog = new DoubleInputDialogWindow("Find brush");
             wndDialog.FirstLabel.Text = "Enter brush origin:";
-            wndDialog.FirstInput.Text = "0 0 0";
+            wndDialog.FirstInput.Text = this.LastFindBrushOrigin;
             wndDialog.SecondLabel.Text = "Search by shader index (empty for all):";
 
             wndDialog.ShowDialog();
@@ -390,7 +391,13 @@ namespace CoD_BSP_Editor
                 }
             }
 
-            MessageBox.Show($"Closest Brush is at index {closestDistanceIndex}");
+            this.LastFindBrushOrigin = BrushOrigin;
+
+            Expander foundElement = BrushFields.Children[closestDistanceIndex + 1] as Expander;
+            foundElement.IsExpanded = true;
+            foundElement.BringIntoView();
+
+            MessageBox.Show($"Closest Brush is at index {closestDistanceIndex}. Distance is '{closestDistance.ToString("0.00")}' units.");
         }
     }
 }
