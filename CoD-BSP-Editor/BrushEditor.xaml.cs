@@ -33,6 +33,7 @@ namespace CoD_BSP_Editor
         private List<BrushInfo> BrushData = new();
 
         private string LastFindBrushOrigin = "0 0 0";
+
         public BrushEditor()
         {
             InitializeComponent();

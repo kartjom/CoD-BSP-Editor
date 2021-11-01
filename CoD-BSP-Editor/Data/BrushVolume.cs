@@ -52,5 +52,13 @@ namespace CoD_BSP_Editor.Data
             Distances[4] = Center.Z - (Size.Z / 2); // Bottom
             Distances[5] = Center.Z + (Size.Z / 2); // Top
         }
+
+        public bool ContainsVector(Vector3 origin)
+        {
+            return
+                origin.X > this.BBoxMin.X && origin.X < this.BBoxMax.X &&
+                origin.Y > this.BBoxMin.Y && origin.Y < this.BBoxMax.Y &&
+                origin.Z > this.BBoxMin.Z && origin.Z < this.BBoxMax.Z;
+        }
     }
 }

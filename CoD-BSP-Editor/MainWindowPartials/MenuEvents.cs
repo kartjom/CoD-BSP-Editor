@@ -19,6 +19,7 @@ namespace CoD_BSP_Editor
     {
         public string LastFindByClassnameString { get; set; }
         public string LastFindByKeyValueString { get; set; }
+        public string LastFindClosestString { get; set; }
 
         private void OpenFile(object sender, RoutedEventArgs e)
         {
@@ -334,6 +335,83 @@ namespace CoD_BSP_Editor
             }
 
             MessageBox.Show("Could not find entity of given key value pair");
+        }
+
+        private void FindClosest(object sender, RoutedEventArgs e)
+        {
+            if (bsp == null) return;
+
+            InputDialogWindow wndDialog = new InputDialogWindow("Find brush");
+            wndDialog.FirstLabel.Text = "Enter origin:";
+            wndDialog.FirstInput.Text = this.LastFindClosestString;
+
+            wndDialog.ShowDialog();
+
+            if (wndDialog.IsConfirmed == false)
+            {
+                return;
+            }
+
+            string SeekOriginString = wndDialog.GetValue();
+
+            if (string.IsNullOrEmpty(SeekOriginString))
+            {
+                MessageBox.Show("Enter valid origin");
+                return;
+            }
+
+            float X, Y, Z;
+            try
+            {
+                string[] Position = SeekOriginString.Split(' ');
+
+                X = float.Parse(Position[0]);
+                Y = float.Parse(Position[1]);
+                Z = float.Parse(Position[2]);
+            }
+            catch
+            {
+                MessageBox.Show("Could not parse origin data");
+                return;
+            }
+
+            Vector3 SeekOrigin = new Vector3(X, Y, Z);
+
+            float closestDistance = int.MaxValue;
+            int closestDistanceIndex = -1;
+
+            for (int i = 0; i < EntityBoxList.Items.Count; i++)
+            {
+                Entity ent = EntityBoxList.Items[i] as Entity;
+
+                if (ent.HasKey("origin") == false)
+                {
+                    continue;
+                }
+
+                string originValue = ent.GetValue("origin");
+                string[] EntityPosition = originValue.Split(' ');
+
+                float originX = float.Parse(EntityPosition[0]);
+                float originY = float.Parse(EntityPosition[1]);
+                float originZ = float.Parse(EntityPosition[2]);
+                Vector3 EntityOrigin = new Vector3(originX, originY, originZ);
+
+                float newDistance = Vector3.Distance(SeekOrigin, EntityOrigin);
+                if (newDistance < closestDistance)
+                {
+                    closestDistance = newDistance;
+                    closestDistanceIndex = i;
+                }
+            }
+
+            this.LastFindClosestString = SeekOriginString;
+
+            Entity closestEntity = EntityBoxList.Items[closestDistanceIndex] as Entity;
+            EntityBoxList.SelectedItem = closestEntity;
+            EntityBoxList.ScrollIntoView(closestEntity);
+
+            MessageBox.Show($"Closest Entity is at index {closestDistanceIndex}. Distance is '{closestDistance.ToString("0.00")}' units.");
         }
 
         private void CreateNewEntity(object sender, RoutedEventArgs e)
