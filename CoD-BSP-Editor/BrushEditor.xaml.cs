@@ -405,8 +405,10 @@ namespace CoD_BSP_Editor
 
                 MessageBox.Show($"Closest Brush is at index {closestDistanceIndex}. Distance is '{closestDistance.ToString("0.00")}' units.");
             }
-
-            MessageBox.Show("Could not match any elements");
+            else
+            {
+                MessageBox.Show("Could not match any elements");
+            }
         }
 
         private void RemoveByArea(object sender, RoutedEventArgs e)
