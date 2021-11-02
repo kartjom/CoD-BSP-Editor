@@ -22,6 +22,24 @@ namespace CoD_BSP_Editor.Data
             this.Initialize(min, max);
         }
 
+        public BrushVolume(string start, string end)
+        {
+            string[] startVec = start.Split(' ');
+            float startX = float.Parse(startVec[0]);
+            float startY = float.Parse(startVec[1]);
+            float startZ = float.Parse(startVec[2]);
+
+            string[] endVec = end.Split(' ');
+            float endX = float.Parse(endVec[0]);
+            float endY = float.Parse(endVec[1]);
+            float endZ = float.Parse(endVec[2]);
+
+            Vector3 vec1 = new Vector3(startX, startY, startZ);
+            Vector3 vec2 = new Vector3(endX, endY, endZ);
+
+            this.Initialize(vec1, vec2);
+        }
+
         public BrushVolume(float[] distances)
         {
             Vector3 vec1 = new Vector3(distances[0], distances[1], distances[2]);

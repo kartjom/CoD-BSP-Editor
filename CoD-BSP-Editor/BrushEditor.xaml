@@ -9,7 +9,10 @@
     <Grid>
         <ScrollViewer HorizontalScrollBarVisibility="Visible">
             <StackPanel Name="BrushFields">
-                <Button Width="200" FontSize="20" Margin="10" HorizontalAlignment="Left" Click="FindBrush">Find brush index</Button>
+                <StackPanel Orientation="Horizontal">
+                    <Button Width="200" FontSize="20" Margin="10" HorizontalAlignment="Left" Click="FindBrush">Find brush index</Button>
+                    <Button Width="200" FontSize="20" Margin="10" HorizontalAlignment="Left" Click="RemoveByArea">Remove by area</Button>
+                </StackPanel>
 
             </StackPanel>
         </ScrollViewer>

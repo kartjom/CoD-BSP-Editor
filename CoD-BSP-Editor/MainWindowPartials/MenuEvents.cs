@@ -408,10 +408,15 @@ namespace CoD_BSP_Editor
             this.LastFindClosestString = SeekOriginString;
 
             Entity closestEntity = EntityBoxList.Items[closestDistanceIndex] as Entity;
-            EntityBoxList.SelectedItem = closestEntity;
-            EntityBoxList.ScrollIntoView(closestEntity);
+            if (closestEntity is not null)
+            {
+                EntityBoxList.SelectedItem = closestEntity;
+                EntityBoxList.ScrollIntoView(closestEntity);
 
-            MessageBox.Show($"Closest Entity is at index {closestDistanceIndex}. Distance is '{closestDistance.ToString("0.00")}' units.");
+                MessageBox.Show($"Closest Entity is at index {closestDistanceIndex}. Distance is '{closestDistance.ToString("0.00")}' units.");
+            }
+
+            MessageBox.Show("Could not match any elements");
         }
 
         private void CreateNewEntity(object sender, RoutedEventArgs e)

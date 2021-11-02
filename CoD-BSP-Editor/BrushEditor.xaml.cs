@@ -33,6 +33,7 @@ namespace CoD_BSP_Editor
         private List<BrushInfo> BrushData = new();
 
         private string LastFindBrushOrigin = "0 0 0";
+        private string LastFindBrushShader = "";
 
         public BrushEditor()
         {
@@ -328,6 +329,7 @@ namespace CoD_BSP_Editor
             wndDialog.FirstLabel.Text = "Enter brush origin:";
             wndDialog.FirstInput.Text = this.LastFindBrushOrigin;
             wndDialog.SecondLabel.Text = "Search by shader index (empty for all):";
+            wndDialog.SecondInput.Text = this.LastFindBrushShader;
 
             wndDialog.ShowDialog();
 
@@ -393,12 +395,94 @@ namespace CoD_BSP_Editor
             }
 
             this.LastFindBrushOrigin = BrushOrigin;
+            this.LastFindBrushShader = Shader == -1 ? "" : BrushShaderIndex;
 
             Expander foundElement = BrushFields.Children[closestDistanceIndex + 1] as Expander;
-            foundElement.IsExpanded = true;
-            foundElement.BringIntoView();
+            if (foundElement is not null)
+            {
+                foundElement.IsExpanded = true;
+                foundElement.BringIntoView();
 
-            MessageBox.Show($"Closest Brush is at index {closestDistanceIndex}. Distance is '{closestDistance.ToString("0.00")}' units.");
+                MessageBox.Show($"Closest Brush is at index {closestDistanceIndex}. Distance is '{closestDistance.ToString("0.00")}' units.");
+            }
+
+            MessageBox.Show("Could not match any elements");
+        }
+
+        private void RemoveByArea(object sender, RoutedEventArgs e)
+        {
+            if (MainWindow.bsp == null) return;
+
+            TripleInputDialogWindow wndDialog = new TripleInputDialogWindow("Remove brushes by area");
+            wndDialog.FirstLabel.Text = "Bounding Box Start:";
+            wndDialog.FirstInput.Text = "0 0 0";
+            wndDialog.SecondLabel.Text = "Bounding Box End:";
+            wndDialog.SecondInput.Text = "1 1 1";
+            wndDialog.ThirdLabel.Text = "Brush Shader (leave empty for all):";
+            wndDialog.ThirdInput.Text = "";
+
+            wndDialog.ShowDialog();
+
+            if (wndDialog.IsConfirmed == false)
+            {
+                return;
+            }
+
+            var (BBoxStart, BBoxEnd, Shader_String) = wndDialog.GetValue();
+
+            if (string.IsNullOrEmpty(BBoxStart) || string.IsNullOrEmpty(BBoxEnd))
+            {
+                MessageBox.Show("Fill all fields before submiting");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(Shader_String))
+            {
+                Shader_String = "-1";
+            }
+
+            BrushVolume BoundingBox;
+            float Shader;
+
+            try
+            {
+                BoundingBox = new BrushVolume(BBoxStart, BBoxEnd);
+                Shader = int.Parse(Shader_String);
+            }
+            catch
+            {
+                MessageBox.Show("Could not parse data");
+                return;
+            }
+
+            int removedBrushesCount = 0;
+            for (int i = 0; i < BrushData.Count; i++)
+            {
+                Vector3 brushCenter = BrushData[i].Center;
+
+                if (BoundingBox.ContainsVector(brushCenter) == false)
+                {
+                    continue;
+                }
+
+                Brush brush = BrushData[i].GetBrush();
+
+                if (Shader == brush.MaterialID || Shader == -1)
+                {
+                    int brushSidesOffset = BrushData[i].SidesOffset;
+
+                    for (int sideIndex = 0; sideIndex < 6; sideIndex++)
+                    {
+                        BrushSides side = MainWindow.bsp.BrushSides[brushSidesOffset + sideIndex];
+                        side.PlaneDistanceUnion = new byte[4] { 0, 0, 0, 0 };
+                        MainWindow.bsp.BrushSides[brushSidesOffset + sideIndex] = side;
+                    }
+
+                    removedBrushesCount++;
+                }
+            }
+
+            MessageBox.Show($"Removed {removedBrushesCount} brushes");
         }
     }
 }
