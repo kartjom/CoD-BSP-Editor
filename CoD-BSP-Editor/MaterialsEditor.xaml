@@ -15,6 +15,9 @@
         <DockPanel Grid.Row="0">
             <Menu DockPanel.Dock="Top" Height="40" FontSize="16">
                 <MenuItem Header="_Tools" Padding="10 8 10 8">
+                    <MenuItem Header="_Create material" Click="CreateMaterial" Padding="5" />
+                    <MenuItem Header="_Remove last material" Click="RemoveLastMaterial" Padding="5" />
+                    <Separator/>
                     <MenuItem Header="_Find material index" Click="FindMaterialIndex" Padding="5" />
                 </MenuItem>
             </Menu>

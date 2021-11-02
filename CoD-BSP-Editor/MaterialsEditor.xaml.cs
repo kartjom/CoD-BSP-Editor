@@ -195,5 +195,69 @@ namespace CoD_BSP_Editor
 
             MessageBox.Show("No materials found");
         }
+
+        private void CreateMaterial(object sender, RoutedEventArgs e)
+        {
+            if (MainWindow.bsp == null) return;
+
+            TripleInputDialogWindow wndDialog = new TripleInputDialogWindow("Create material");
+            wndDialog.FirstLabel.Text = "Material name:";
+            wndDialog.FirstInput.MaxLength = 64;
+            wndDialog.SecondLabel.Text = "Surface type:";
+            wndDialog.SecondInput.Text = "0";
+            wndDialog.ThirdLabel.Text = "Surface properties:";
+            wndDialog.ThirdInput.Text = "0";
+
+            wndDialog.ShowDialog();
+
+            if (wndDialog.IsConfirmed == false)
+            {
+                return;
+            }
+
+            var (ShaderName, Flag1_String, Flag2_String) = wndDialog.GetValue();
+
+            if (string.IsNullOrEmpty(ShaderName) ||
+                string.IsNullOrEmpty(Flag1_String) ||
+                string.IsNullOrEmpty(Flag2_String) ||
+                ShaderName.Length > 64)
+            {
+                MessageBox.Show("Fill all fields before submiting");
+                return;
+            }
+
+            uint Flag1, Flag2;
+            try
+            {
+                Flag1 = uint.Parse(Flag1_String);
+                Flag2 = uint.Parse(Flag2_String);
+            }
+            catch
+            {
+                MessageBox.Show("Could not parse data");
+                return;
+            }
+
+            Shader newShader = ShaderUtils.Construct(ShaderName, Flag1, Flag2);
+            MainWindow.bsp.Shaders.Add(newShader);
+
+            int newShaderIndex = MainWindow.bsp.Shaders.Count - 1;
+            this.CreateMaterialEditField(newShaderIndex, newShader);
+        }
+
+        private void RemoveLastMaterial(object sender, RoutedEventArgs e)
+        {
+            if (MainWindow.bsp == null) return;
+            if (MainWindow.bsp.Shaders.Count <= 0) return;
+
+            MessageBoxResult result = MessageBox.Show("Last material will be removed. Proceed?", "Remove last material", MessageBoxButton.YesNo);
+            if (result == MessageBoxResult.No) return;
+
+            int BspShadersLastIndex = MainWindow.bsp.Shaders.Count - 1;
+            MainWindow.bsp.Shaders.RemoveAt(BspShadersLastIndex);
+
+            int ShaderFieldsLastIndex = ShaderFields.Children.Count - 1;
+            ShaderFields.Children.RemoveAt(ShaderFieldsLastIndex);
+        }
     }
 }
