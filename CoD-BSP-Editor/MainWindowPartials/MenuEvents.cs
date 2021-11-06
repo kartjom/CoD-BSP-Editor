@@ -553,7 +553,7 @@ namespace CoD_BSP_Editor
             {
                 KeyValues = new()
                 {
-                    new("info_model", $"*{modelIndex}"),
+                    new("model", $"*{modelIndex}"),
                     new("info_min", BBoxMin.String()),
                     new("info_max", BBoxMax.String()),
                     new("info_center", BBoxCenter.String()),
