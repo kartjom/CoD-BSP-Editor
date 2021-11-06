@@ -13,8 +13,7 @@ namespace CoD_BSP_Editor.Data
         public string Classname { get; set; }
         public List<KeyValuePair<string, string>> KeyValues = new();
 
-        public Entity() { }
-        public Entity(string classname)
+        public Entity(string classname = "")
         {
             this.Classname = classname;
         }

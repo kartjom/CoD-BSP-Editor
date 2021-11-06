@@ -59,14 +59,5 @@ namespace CoD_BSP_Editor.Data
             List<BrushSides> sides = MainWindow.bsp.BrushSides.GetRange(this.SidesOffset, this.SidesCount);
             return sides;
         }
-
-        public string GetCenterString()
-        {
-            string center = $"{Center.X}| {Center.Y}| {Center.Z}";
-            center = center.Replace(',', '.');
-            center = center.Replace('|', ',');
-
-            return center;
-        }
     }
 }

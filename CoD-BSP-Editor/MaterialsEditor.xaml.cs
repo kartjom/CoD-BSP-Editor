@@ -243,6 +243,8 @@ namespace CoD_BSP_Editor
 
             int newShaderIndex = MainWindow.bsp.Shaders.Count - 1;
             this.CreateMaterialEditField(newShaderIndex, newShader);
+
+            MessageBox.Show("Material created");
         }
 
         private void RemoveLastMaterial(object sender, RoutedEventArgs e)

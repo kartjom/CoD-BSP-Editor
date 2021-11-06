@@ -360,22 +360,16 @@ namespace CoD_BSP_Editor
                 return;
             }
 
-            float X, Y, Z;
+            Vector3 SeekOrigin;
             try
             {
-                string[] Position = SeekOriginString.Split(' ');
-
-                X = float.Parse(Position[0]);
-                Y = float.Parse(Position[1]);
-                Z = float.Parse(Position[2]);
+                SeekOrigin = VectorExt.FromString(SeekOriginString);
             }
             catch
             {
                 MessageBox.Show("Could not parse origin data");
                 return;
             }
-
-            Vector3 SeekOrigin = new Vector3(X, Y, Z);
 
             float closestDistance = int.MaxValue;
             int closestDistanceIndex = -1;
@@ -390,12 +384,7 @@ namespace CoD_BSP_Editor
                 }
 
                 string originValue = ent.GetValue("origin");
-                string[] EntityPosition = originValue.Split(' ');
-
-                float originX = float.Parse(EntityPosition[0]);
-                float originY = float.Parse(EntityPosition[1]);
-                float originZ = float.Parse(EntityPosition[2]);
-                Vector3 EntityOrigin = new Vector3(originX, originY, originZ);
+                Vector3 EntityOrigin = VectorExt.FromString(originValue);
 
                 float newDistance = Vector3.Distance(SeekOrigin, EntityOrigin);
                 if (newDistance < closestDistance)
@@ -413,7 +402,7 @@ namespace CoD_BSP_Editor
                 EntityBoxList.SelectedItem = closestEntity;
                 EntityBoxList.ScrollIntoView(closestEntity);
 
-                MessageBox.Show($"Closest Entity is at index {closestDistanceIndex}. Distance is '{closestDistance.ToString("0.00")}' units.");
+                MessageBox.Show($"Closest Entity is at index {closestDistanceIndex}. Distance is '{closestDistance:0.00}' units.");
             }
             else
             {
@@ -523,10 +512,12 @@ namespace CoD_BSP_Editor
             if (bsp == null) return;
 
             CreateBrushWindow input = new CreateBrushWindow();
-
             input.ShowDialog();
 
-            if (input.IsConfirmed == false) return;
+            if (input.IsConfirmed == false)
+            {
+                return;
+            }
 
             var (BBoxMinStr, BBoxMaxStr, ShaderName, IsStatic) = input.GetValues();
 
@@ -536,18 +527,12 @@ namespace CoD_BSP_Editor
                 return;
             }
 
-            List<string> BrushDistancesList = new List<string>();
-            BrushDistancesList.AddRange(BBoxMinStr.Split(' '));
-            BrushDistancesList.AddRange(BBoxMaxStr.Split(' '));
-
-            float[] BrushDistances = new float[6];
-
+            Vector3 BBoxMin, BBoxMax, BBoxCenter;
             try
             {
-                for (int i = 0; i < 6; i++)
-                {
-                    BrushDistances[i] = float.Parse(BrushDistancesList[i]);
-                }
+                BBoxMin = VectorExt.FromString(BBoxMinStr);
+                BBoxMax = VectorExt.FromString(BBoxMaxStr);
+                BBoxCenter = (BBoxMin + BBoxMax) / 2;
             }
             catch
             {
@@ -555,49 +540,26 @@ namespace CoD_BSP_Editor
                 return;
             }
 
-            Vector3 BBoxMin = new Vector3(BrushDistances[0], BrushDistances[1], BrushDistances[2]);
-            Vector3 BBoxMax = new Vector3(BrushDistances[3], BrushDistances[4], BrushDistances[5]);
-
             Shader brushShader = ShaderUtils.Construct(ShaderName, 128, 671088641);
             CollmapData brush = CollmapData.CreateBrush(BBoxMin, BBoxMax, brushShader);
-
-            // For printing BBoxCenter in Entity KeyValues, useful for setting up entity origin
-            Vector3 BBoxCenter = (BBoxMin + BBoxMax) / 2;
-            string BBoxCenterStr = $"{BBoxCenter.X} {BBoxCenter.Y} {BBoxCenter.Z}".Replace(',', '.');
 
             // Add new entity to the list
             Entity collmapEntity;
 
+            string brushClassname = IsStatic ? "func_static" : "editor_brush_info";
             int modelIndex = bsp.Models.Count;
 
-            if (IsStatic)
+            collmapEntity = new Entity(brushClassname)
             {
-                collmapEntity = new Entity("func_static")
+                KeyValues = new()
                 {
-                    KeyValues = new()
-                    {
-                        new("model", $"*{modelIndex}"),
-                        new("info_min", BBoxMinStr),
-                        new("info_max", BBoxMaxStr),
-                        new("info_center", BBoxCenterStr),
-                        new("info_shader", ShaderUtils.GetMaterial(brush.Shader)),
-                    }
-                };
-            }
-            else
-            {
-                collmapEntity = new Entity("editor_brush_info")
-                {
-                    KeyValues = new()
-                    {
-                        new("info_model", $"*{modelIndex}"),
-                        new("info_min", BBoxMinStr),
-                        new("info_max", BBoxMaxStr),
-                        new("info_center", BBoxCenterStr),
-                        new("info_shader", ShaderUtils.GetMaterial(brush.Shader)),
-                    }
-                };
-            }
+                    new("info_model", $"*{modelIndex}"),
+                    new("info_min", BBoxMin.String()),
+                    new("info_max", BBoxMax.String()),
+                    new("info_center", BBoxCenter.String()),
+                    new("info_shader", ShaderUtils.GetMaterial(brush.Shader)),
+                }
+            };
 
             EntityBoxList.Items.Add(collmapEntity);
             EntityBoxList.Items.Refresh();
@@ -769,7 +731,7 @@ namespace CoD_BSP_Editor
 
             if (input.IsConfirmed == false) return;
 
-            string inputString = input.GetValue();
+            string inputString = input.GetValue().Replace(',', '.');
             if (string.IsNullOrEmpty(inputString))
             {
                 MessageBox.Show("Value cannot be null"); return;

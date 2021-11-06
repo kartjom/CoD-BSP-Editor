@@ -71,7 +71,7 @@ namespace CoD_BSP_Editor
                 Margin = SectionMargin, Padding = SectionMargin,
                 FontSize = Font, Background = SectionBackground,
 
-                Header = $"Brush [{index}] - ( {BrushData[index].GetCenterString()} )",
+                Header = $"Brush [{index}] - ( {BrushData[index].Center.String(", ")} )",
                 Tag = index // Brush Index
             };
 
@@ -140,12 +140,12 @@ namespace CoD_BSP_Editor
                     int planeIndex = (int)brushSides[i].GetPlaneIndex();
                     Plane plane = MainWindow.bsp.Planes[planeIndex];
 
-                    string PlaneOffsetString = $"{plane.D}".Replace(',', '.');
+                    string PlaneOffsetString = $"{plane.D}";
                     bsOffsetInput.Text = PlaneOffsetString;
                 }
                 else
                 {
-                    string BrushSideOffsetString = $"{brushSides[i].GetDistance()}".Replace(',', '.');
+                    string BrushSideOffsetString = $"{brushSides[i].GetDistance()}";
                     bsOffsetInput.Text = BrushSideOffsetString;
                 }
 
@@ -264,7 +264,7 @@ namespace CoD_BSP_Editor
 
             try
             {
-                string String_OffsetToParse = String_Offset.Replace('.', ',');
+                string String_OffsetToParse = String_Offset;
                 float Offset;
 
                 if (String_Offset.EndsWith('.'))
@@ -305,7 +305,7 @@ namespace CoD_BSP_Editor
                 // Recalculate center
                 BrushData[BrushIndex].CalculateCenterFromSides();
 
-                string Center = BrushData[BrushIndex].GetCenterString();
+                string Center = BrushData[BrushIndex].Center.String(", ");
                 BrushInfoContainer.Header = $"Brush [{BrushIndex}] - ( {Center} )";
             }
             catch
@@ -316,7 +316,7 @@ namespace CoD_BSP_Editor
                 // Recalculate center
                 BrushData[BrushIndex].CalculateCenterFromSides();
 
-                string Center = BrushData[BrushIndex].GetCenterString();
+                string Center = BrushData[BrushIndex].Center.String(", ");
                 BrushInfoContainer.Header = $"Brush [{BrushIndex}] - ( {Center} )";
             }
         }
@@ -351,15 +351,11 @@ namespace CoD_BSP_Editor
                 BrushShaderIndex = "-1";
             }
 
-            float X, Y, Z;
+            Vector3 SeekOrigin;
             int Shader;
             try
             {
-                string[] Position = BrushOrigin.Split(' ');
-
-                X = float.Parse(Position[0]);
-                Y = float.Parse(Position[1]);
-                Z = float.Parse(Position[2]);
+                SeekOrigin = VectorExt.FromString(BrushOrigin);
 
                 Shader = int.Parse(BrushShaderIndex);
             }
@@ -368,8 +364,6 @@ namespace CoD_BSP_Editor
                 MessageBox.Show("Could not parse data");
                 return;
             }
-
-            Vector3 SeekOrigin = new Vector3(X, Y, Z);
 
             float closestDistance = int.MaxValue;
             int closestDistanceIndex = -1;
