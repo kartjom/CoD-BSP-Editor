@@ -21,6 +21,9 @@ namespace CoD_BSP_Editor
         public string LastFindByKeyValueString { get; set; }
         public string LastFindClosestString { get; set; }
 
+        public string LastCreateBrushShaderString { get; set; }
+        public bool LastCreateBrushIsStatic { get; set; }
+
         private void OpenFile(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -512,6 +515,8 @@ namespace CoD_BSP_Editor
             if (bsp == null) return;
 
             CreateBrushWindow input = new CreateBrushWindow();
+            input.ShaderName.Text = LastCreateBrushShaderString ?? "textures/common/trigger";
+            input.IsStatic.IsChecked = LastCreateBrushIsStatic;
             input.ShowDialog();
 
             if (input.IsConfirmed == false)
@@ -530,6 +535,9 @@ namespace CoD_BSP_Editor
             Vector3 BBoxMin, BBoxMax, BBoxCenter;
             try
             {
+                LastCreateBrushShaderString = ShaderName;
+                LastCreateBrushIsStatic = IsStatic;
+
                 BBoxMin = VectorExt.FromString(BBoxMinStr);
                 BBoxMax = VectorExt.FromString(BBoxMaxStr);
                 BBoxCenter = (BBoxMin + BBoxMax) / 2;
