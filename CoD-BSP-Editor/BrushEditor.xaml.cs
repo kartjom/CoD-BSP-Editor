@@ -391,9 +391,9 @@ namespace CoD_BSP_Editor
             this.LastFindBrushOrigin = BrushOrigin;
             this.LastFindBrushShader = Shader == -1 ? "" : BrushShaderIndex;
 
-            Expander foundElement = BrushFields.Children[closestDistanceIndex] as Expander;
-            if (foundElement is not null)
+            if (closestDistanceIndex != -1)
             {
+                Expander foundElement = BrushFields.Children[closestDistanceIndex] as Expander;
                 foundElement.IsExpanded = true;
                 foundElement.BringIntoView();
 

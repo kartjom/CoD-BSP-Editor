@@ -344,7 +344,7 @@ namespace CoD_BSP_Editor
         {
             if (bsp == null) return;
 
-            InputDialogWindow wndDialog = new InputDialogWindow("Find brush");
+            InputDialogWindow wndDialog = new InputDialogWindow("Find closest entity");
             wndDialog.FirstLabel.Text = "Enter origin:";
             wndDialog.FirstInput.Text = this.LastFindClosestString;
 
@@ -399,9 +399,9 @@ namespace CoD_BSP_Editor
 
             this.LastFindClosestString = SeekOriginString;
 
-            Entity closestEntity = EntityBoxList.Items[closestDistanceIndex] as Entity;
-            if (closestEntity is not null)
+            if (closestDistanceIndex != -1)
             {
+                Entity closestEntity = EntityBoxList.Items[closestDistanceIndex] as Entity;
                 EntityBoxList.SelectedItem = closestEntity;
                 EntityBoxList.ScrollIntoView(closestEntity);
 
@@ -565,6 +565,7 @@ namespace CoD_BSP_Editor
                     new("info_min", BBoxMin.String()),
                     new("info_max", BBoxMax.String()),
                     new("info_center", BBoxCenter.String()),
+                    new("info_brushindex", bsp.Brushes.Count.ToString()),
                     new("info_shader", ShaderUtils.GetMaterial(brush.Shader)),
                 }
             };
