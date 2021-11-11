@@ -439,7 +439,6 @@ namespace CoD_BSP_Editor
 
             BrushVolume BoundingBox;
             float Shader;
-
             try
             {
                 BoundingBox = new BrushVolume(BBoxStart, BBoxEnd);

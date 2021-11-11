@@ -33,7 +33,7 @@
                     <MenuItem Header="_Find closest" Click="FindClosest" Padding="5" />
                     <Separator/>
                     <MenuItem Header="_Replace key values" Click="ReplaceKeyValues" Padding="5" />
-                    <MenuItem Header="_Remove by origin" Click="RemoveByOrigin" Padding="5" />
+                    <MenuItem Header="_Remove within bounds" Click="RemoveWithinBounds" Padding="5" />
                 </MenuItem>
                 <MenuItem Header="_Utility" Padding="10 8 10 8">
                     <MenuItem Header="_Remove singleplayer entities" Click="RemoveSingleplayerEntities" Padding="5" />

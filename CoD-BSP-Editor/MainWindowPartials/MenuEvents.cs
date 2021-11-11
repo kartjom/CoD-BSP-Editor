@@ -731,40 +731,34 @@ namespace CoD_BSP_Editor
             MessageBox.Show($"Replaced {replaced} occurences");
         }
         
-        private void RemoveByOrigin(object sender, RoutedEventArgs e)
+        private void RemoveWithinBounds(object sender, RoutedEventArgs e)
         {
             if (bsp == null || bsp.Lumps == null) return;
 
-            InputDialogWindow input = new InputDialogWindow("Remove by origin", "Syntax: operator x y z");
-            input.ShowDialog();
+            DoubleInputDialogWindow wndDialog = new DoubleInputDialogWindow("Remove within bounds");
+            wndDialog.FirstLabel.Text = "Bounding Box Start:";
+            wndDialog.FirstInput.Text = "0 0 0";
+            wndDialog.SecondLabel.Text = "Bounding Box End:";
+            wndDialog.SecondInput.Text = "1 1 1";
+            wndDialog.ShowDialog();
 
-            if (input.IsConfirmed == false) return;
+            if (wndDialog.IsConfirmed == false) return;
 
-            string inputString = input.GetValue().Replace(',', '.');
-            if (string.IsNullOrEmpty(inputString))
+            var (BBoxStart, BBoxEnd) = wndDialog.GetValue();
+
+            if (string.IsNullOrEmpty(BBoxStart) || string.IsNullOrEmpty(BBoxEnd))
             {
-                MessageBox.Show("Value cannot be null"); return;
+                MessageBox.Show("Fill all fields before submiting"); return;
             }
 
-            char charOperator;
-            int x, y, z;
-
+            BrushVolume BoundingBox;
             try
             {
-                string[] tokens = inputString.Split(' ');
-
-                x = tokens[1] != "*" ? int.Parse(tokens[1]) : int.MaxValue;
-                y = tokens[2] != "*" ? int.Parse(tokens[2]) : int.MaxValue;
-                z = tokens[3] != "*" ? int.Parse(tokens[3]) : int.MaxValue;
-
-                charOperator = tokens[0][0];
-
-                if (charOperator != '<' && charOperator != '>') throw new Exception();
-                if (x == int.MaxValue && y == int.MaxValue && z == int.MaxValue) throw new Exception();
+                BoundingBox = new BrushVolume(BBoxStart, BBoxEnd);
             }
             catch
             {
-                MessageBox.Show("Invalid syntax");
+                MessageBox.Show("Could not parse data");
                 return;
             }
 
@@ -775,36 +769,21 @@ namespace CoD_BSP_Editor
 
                 if (ent.HasKey("origin") == false) continue;
 
-                string[] tokens = ent.GetValue("origin").Split(' ');
-                int _x = int.Parse(tokens[0]), _y = int.Parse(tokens[1]), _z = int.Parse(tokens[2]);
-               
-                if (charOperator == '>')
+                Vector3 entOrigin;
+                try
                 {
-                    bool xMarked = (x == int.MaxValue || _x > x);
-                    bool yMarked = (y == int.MaxValue || _y > y);
-                    bool zMarked = (z == int.MaxValue || _z > z);
-
-                    if (xMarked && yMarked && zMarked)
-                    {
-                        EntityBoxList.Items.RemoveAt(i--);
-                        removed++;
-
-                        continue;
-                    }
+                    string originString = ent.GetValue("origin");
+                    entOrigin = VectorExt.FromString(originString);
                 }
-                else if (charOperator == '<')
+                catch
                 {
-                    bool xMarked = (x == int.MaxValue || _x < x);
-                    bool yMarked = (y == int.MaxValue || _y < y);
-                    bool zMarked = (z == int.MaxValue || _z < z);
+                    continue;
+                }
 
-                    if (xMarked && yMarked && zMarked)
-                    {
-                        EntityBoxList.Items.RemoveAt(i--);
-                        removed++;
-
-                        continue;
-                    }
+                if (BoundingBox.ContainsVector(entOrigin))
+                {
+                    EntityBoxList.Items.RemoveAt(i--);
+                    removed++;
                 }
             }
 
