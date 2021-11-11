@@ -40,7 +40,7 @@ namespace CoD_BSP_Editor
                 bsp = new d3dbsp(openFileDialog.FileName);
 
                 string fileName = Path.GetFileName(openFileDialog.FileName);
-                this.Title = $"Call of Duty - BSP Editor ({fileName})";
+                this.Title = this.GetTitle() + $" ({fileName})";
 
                 this.CloseAllWindows();
                 this.InitializeWorkingEnvironment(bsp.Entities);

@@ -28,6 +28,16 @@ namespace CoD_BSP_Editor
         public MainWindow()
         {
             InitializeComponent();
+
+            this.Title = this.GetTitle();
+        }
+
+        public string GetTitle()
+        {
+            string AppName = "Call of Duty - BSP Editor";
+            string AppVersion = "v1.2";
+
+            return $"{AppName} {AppVersion}";
         }
 
         private void UpdateCurrentEntityText()
