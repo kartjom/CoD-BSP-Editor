@@ -31,19 +31,7 @@ namespace CoD_BSP_Editor
 
             if (openFileDialog.ShowDialog() == true)
             {
-                if (bsp != null)
-                {
-                    MessageBoxResult result = MessageBox.Show("Any unsaved progress will be lost. Proceed?", "Open file", MessageBoxButton.YesNo);
-                    if (result == MessageBoxResult.No) return;
-                }
-
-                bsp = new d3dbsp(openFileDialog.FileName);
-
-                string fileName = Path.GetFileName(openFileDialog.FileName);
-                this.Title = this.GetTitle() + $" ({fileName})";
-
-                this.CloseAllWindows();
-                this.InitializeWorkingEnvironment(bsp.Entities);
+                this.OpenFile(openFileDialog.FileName);
             }
         }
 

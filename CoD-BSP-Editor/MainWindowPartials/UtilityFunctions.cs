@@ -1,4 +1,5 @@
-﻿using CoD_BSP_Editor.Data;
+﻿using CoD_BSP_Editor.BSP;
+using CoD_BSP_Editor.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,25 @@ namespace CoD_BSP_Editor
             }
 
             return removed;
+        }
+    
+        public void OpenFile(string filePath)
+        {
+            this.Activate();
+
+            if (bsp != null)
+            {
+                MessageBoxResult result = MessageBox.Show("Any unsaved progress will be lost. Proceed?", "Open file", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.No) return;
+            }
+
+            bsp = new d3dbsp(filePath);
+
+            string fileName = System.IO.Path.GetFileName(filePath);
+            this.Title = this.GetTitle() + $" ({fileName})";
+
+            this.CloseAllWindows();
+            this.InitializeWorkingEnvironment(bsp.Entities);
         }
     }
 }

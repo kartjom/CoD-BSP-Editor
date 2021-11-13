@@ -12,9 +12,6 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace CoD_BSP_Editor
 {
@@ -141,6 +138,21 @@ namespace CoD_BSP_Editor
             foreach (var (Key, Value) in SelectedEntity.KeyValues)
             {
                 CreateKeyValueField(Key, Value, index++);
+            }
+        }
+
+        private void Window_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] droppedFiles = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                string firstFile = droppedFiles[0];
+                string fileExtension = System.IO.Path.GetExtension(firstFile);
+
+                if (fileExtension != ".bsp") return;
+
+                this.OpenFile(firstFile);
             }
         }
     }

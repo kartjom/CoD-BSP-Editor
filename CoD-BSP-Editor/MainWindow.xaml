@@ -5,6 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CoD_BSP_Editor"
         mc:Ignorable="d"
+        AllowDrop="True"
+        Drop="Window_Drop"
         Title="Call of Duty - BSP Editor" Height="600" Width="1200" WindowStartupLocation="CenterScreen">
 
     <Grid>
