@@ -823,5 +823,17 @@ namespace CoD_BSP_Editor
             lumpInfoWindow.Owner = this;
             lumpInfoWindow.Show();
         }
+        
+        private void AboutInfo(object sender, RoutedEventArgs e)
+        {
+            foreach (Window win in App.Current.Windows)
+            {
+                if (win is AboutInfo) return;
+            }
+
+            AboutInfo aboutInfoWindow = new AboutInfo(this.GetTitle(), this.GetAuthor(), this.GetGithub());
+            aboutInfoWindow.Owner = this;
+            aboutInfoWindow.Show();
+        }
     }
 }

@@ -56,6 +56,8 @@
                 </MenuItem>
                 <MenuItem Header="_Info" Padding="10 8 10 8">
                     <MenuItem Header="_Lump Headers" Click="ShowLumpInfo" Padding="5" />
+                    <Separator/>
+                    <MenuItem Header="_About" Click="AboutInfo" Padding="5" />
                 </MenuItem>
             </Menu>
             <TextBox AcceptsReturn="True" />

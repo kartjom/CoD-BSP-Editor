@@ -37,6 +37,16 @@ namespace CoD_BSP_Editor
             return $"{AppName} {AppVersion}";
         }
 
+        public string GetAuthor()
+        {
+            return "kartjom";
+        }
+
+        public string GetGithub()
+        {
+            return "https://github.com/KartaB";
+        }
+
         private void UpdateCurrentEntityText()
         {
             if (EntityBoxList.SelectedIndex == -1)
