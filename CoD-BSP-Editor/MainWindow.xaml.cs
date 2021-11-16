@@ -32,7 +32,7 @@ namespace CoD_BSP_Editor
         public string GetTitle()
         {
             string AppName = "Call of Duty - BSP Editor";
-            string AppVersion = "v1.2";
+            string AppVersion = "v1.3";
 
             return $"{AppName} {AppVersion}";
         }
