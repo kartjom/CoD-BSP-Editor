@@ -162,8 +162,9 @@ namespace CoD_BSP_Editor
             List<string> defaultEntsList = new()
             {
                 "{\n\"classname\" \"mp_deathmatch_spawn\"\n\"origin\" \"0 0 0\"\n}",
-                "{\n\"classname\" \"mp_uo_spawn_allies\"\n\"model\" \"xmodel/airborne\"\n\"origin\" \"0 0 0\"\n}",
-                "{\n\"classname\" \"mp_uo_spawn_axis\"\n\"model\" \"xmodel/wehrmacht_soldier\"\n\"origin\" \"0 0 0\"\n}",
+                "{\n\"classname\" \"mp_deathmatch_intermission\"\n\"origin\" \"0 0 0\"\n}",
+                "{\n\"classname\" \"mp_uo_spawn_allies\"\n\"origin\" \"0 0 0\"\n}",
+                "{\n\"classname\" \"mp_uo_spawn_axis\"\n\"origin\" \"0 0 0\"\n}",
                 "{\n\"classname\" \"mp_teamdeathmatch_spawn\"\n\"origin\" \"0 0 0\"\n}",
                 "{\n\"classname\" \"mp_teamdeathmatch_intermission\"\n\"origin\" \"0 0 0\"\n}",
                 "{\n\"classname\" \"mp_ctf_intermission\"\n\"origin\" \"0 0 0\"\n}",
@@ -466,9 +467,14 @@ namespace CoD_BSP_Editor
                     {
                         new("model", $"*{bsp.Models.Count}"),
                         new("targetname", $"xmodel/{fileName}"),
-                        new("info_shader", ShaderUtils.GetMaterial(collmap.Shader)),
                     }
                 };
+
+                for (int i = 0; i < collmap.Shaders.Length; i++)
+                {
+                    string shaderName = ShaderUtils.GetMaterial(collmap.Shaders[i]);
+                    collmapEntity.KeyValues.Add(new($"info_shader_{i}", shaderName));
+                }
 
                 EntityBoxList.Items.Add(collmapEntity);
                 EntityBoxList.Items.Refresh();
@@ -554,7 +560,7 @@ namespace CoD_BSP_Editor
                     new("info_max", BBoxMax.String()),
                     new("info_center", BBoxCenter.String()),
                     new("info_brushindex", bsp.Brushes.Count.ToString()),
-                    new("info_shader", ShaderUtils.GetMaterial(brush.Shader)),
+                    new("info_shader", ShaderUtils.GetMaterial(brush.Shaders[0])),
                 }
             };
 
