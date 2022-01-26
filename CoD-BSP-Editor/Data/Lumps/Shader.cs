@@ -14,7 +14,7 @@ namespace CoD_BSP_Editor.Data
         public char[] Material;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-        public uint[] Flags;
+        public uint[] Flags; // Surface, Content
     }
 
     public static class ShaderUtils

@@ -6,6 +6,6 @@ namespace CoD_BSP_Editor.Data
     public struct Brush
     {
         public ushort Sides;
-        public ushort MaterialID;
+        public ushort MaterialID; // Uses material's Content Flag
     }
 }
