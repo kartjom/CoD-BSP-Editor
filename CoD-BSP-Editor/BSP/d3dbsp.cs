@@ -96,10 +96,18 @@ namespace CoD_BSP_Editor.BSP
         public byte[] ExtractCollmapData()
         {
             List<byte> collmapContent = new();
-            byte[] shaderContent = BinLib.ToByteArray<Shader>(this.Shaders[0]);
+            byte[] shaderContent = BinLib.ListToByteArray<Shader>(this.Shaders);
             byte[] brushSidesContent = BinLib.ListToByteArray<BrushSides>(this.BrushSides);
-            byte[] brushContent = BinLib.ToByteArray<Brush>(this.Brushes[0]);
+            byte[] brushContent = BinLib.ListToByteArray<Brush>(this.Brushes);
             byte[] modelContent = BinLib.ToByteArray<Model>(this.Models[0]);
+
+            byte[] shaderNum = BinLib.ToByteArray<int>(this.Shaders.Count);
+            byte[] brushSidesNum = BinLib.ToByteArray<int>(this.BrushSides.Count);
+            byte[] brushNum = BinLib.ToByteArray<int>(this.Brushes.Count);
+
+            collmapContent.AddRange(shaderNum);
+            collmapContent.AddRange(brushSidesNum);
+            collmapContent.AddRange(brushNum);
 
             collmapContent.AddRange(shaderContent);
             collmapContent.AddRange(brushSidesContent);
@@ -218,24 +226,36 @@ namespace CoD_BSP_Editor.BSP
 
         public void ImportCollmap(CollmapData collmap)
         {
-            int MaterialID = this.FindMaterialIndex( ShaderUtils.GetMaterial(collmap.Shader) );
-            if (MaterialID == -1)
+            foreach (Shader shader in collmap.Shaders)
             {
-                // If map does not contain such texture, create add it
-                MaterialID = this.Shaders.Count;
-                this.Shaders.Add(collmap.Shader);
+                int MaterialID = this.FindMaterialIndex(ShaderUtils.GetMaterial(shader));
+
+                if (MaterialID == -1)
+                {
+                    this.Shaders.Add(shader);
+                }
             }
 
             collmap.Model.BrushesOffset = (uint)this.Brushes.Count;
-            collmap.Brush.MaterialID = (ushort)MaterialID;
+            collmap.Model.BrushesSize = (uint)collmap.Brushes.Length;
 
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < collmap.Brushes.Length; i++)
             {
-                collmap.BrushSides[i].MaterialID = (uint)MaterialID;
+                int CollmapMaterialID = collmap.Brushes[i].MaterialID;
+                string MaterialName = ShaderUtils.GetMaterial(collmap.Shaders[CollmapMaterialID]);
+                int MaterialID = this.FindMaterialIndex(MaterialName);
+
+                collmap.Brushes[i].MaterialID = (ushort)MaterialID;
+
+                int brushSidesOffset = 6 * i;
+                for (int j = brushSidesOffset; j < 6 + brushSidesOffset; j++)
+                {
+                    collmap.BrushSides[j].MaterialID = (uint)MaterialID;
+                }
             }
 
             this.BrushSides.AddRange(collmap.BrushSides);
-            this.Brushes.Add(collmap.Brush);
+            this.Brushes.AddRange(collmap.Brushes);
             this.Models.Add(collmap.Model);
         }
 
