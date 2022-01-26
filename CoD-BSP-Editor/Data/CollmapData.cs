@@ -6,9 +6,9 @@ namespace CoD_BSP_Editor.Data
 {
     public struct CollmapData
     {
-        public Shader Shader;
+        public Shader[] Shaders;
         public BrushSides[] BrushSides;
-        public Brush Brush;
+        public Brush[] Brushes;
         public Model Model;
 
         public static CollmapData ReadFromByteArray(byte[] collmapData)
@@ -17,14 +17,18 @@ namespace CoD_BSP_Editor.Data
 
             using (BinaryReader reader = new BinaryReader(new MemoryStream(collmapData)))
             {
-                byte[] shaderData = reader.ReadBytes(BinLib.SizeOf<Shader>());
-                byte[] brushSidesData = reader.ReadBytes(BinLib.SizeOf<BrushSides>() * 6);
-                byte[] brushData = reader.ReadBytes(BinLib.SizeOf<Brush>());
+                int shaderCount = reader.ReadInt32();
+                int brushSidesNum = reader.ReadInt32();
+                int brushNum = reader.ReadInt32();
+
+                byte[] shaderData = reader.ReadBytes(BinLib.SizeOf<Shader>() * shaderCount);
+                byte[] brushSidesData = reader.ReadBytes(BinLib.SizeOf<BrushSides>() * brushSidesNum);
+                byte[] brushData = reader.ReadBytes(BinLib.SizeOf<Brush>() * brushNum);
                 byte[] modelData = reader.ReadBytes(BinLib.SizeOf<Model>());
 
-                collmap.Shader = BinLib.ReadFromByteArray<Shader>(shaderData);
+                collmap.Shaders = BinLib.ReadListFromByteArray<Shader>(shaderData).ToArray();
                 collmap.BrushSides = BinLib.ReadListFromByteArray<BrushSides>(brushSidesData).ToArray();
-                collmap.Brush = BinLib.ReadFromByteArray<Brush>(brushData);
+                collmap.Brushes = BinLib.ReadListFromByteArray<Brush>(brushData).ToArray();
                 collmap.Model = BinLib.ReadFromByteArray<Model>(modelData);
             }
 
@@ -36,8 +40,12 @@ namespace CoD_BSP_Editor.Data
             CollmapData collmap = new CollmapData();
             BrushVolume brush = new BrushVolume(BBoxMin, BBoxMax);
 
-            collmap.Shader = Texture ?? ShaderUtils.Construct("textures/common/trigger", 128, 671088641);
-            collmap.Brush = new Brush() { MaterialID = 0, Sides = 6 };
+            collmap.Shaders = new Shader[1];
+            collmap.Shaders[0] = Texture ?? ShaderUtils.Construct("textures/common/trigger", 128, 671088641);
+            
+            collmap.Brushes = new Brush[1];
+            collmap.Brushes[0] = new Brush() { MaterialID = 0, Sides = 6 };
+            
             collmap.BrushSides = new BrushSides[6];
 
             for (int i = 0; i < 6; i++)
