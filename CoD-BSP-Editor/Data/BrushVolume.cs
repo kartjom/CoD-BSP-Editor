@@ -78,5 +78,19 @@ namespace CoD_BSP_Editor.Data
                 origin.Y > this.BBoxMin.Y && origin.Y < this.BBoxMax.Y &&
                 origin.Z > this.BBoxMin.Z && origin.Z < this.BBoxMax.Z;
         }
+
+        public Vector3 MoveByOffset(Vector3 offset)
+        {
+            Vector3 oldCenter = this.Center;
+
+            Vector3 newMin = this.BBoxMin + offset;
+            Vector3 newMax = this.BBoxMax + offset;
+
+            this.Initialize(newMin, newMax);
+
+            return oldCenter;
+        }
+
+
     }
 }
