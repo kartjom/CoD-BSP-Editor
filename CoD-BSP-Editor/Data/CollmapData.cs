@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace CoD_BSP_Editor.Data
 {
-    public struct CollmapData
+    public class CollmapData
     {
         public Shader[] Shaders;
         public BrushSides[] BrushSides;
@@ -55,11 +55,9 @@ namespace CoD_BSP_Editor.Data
 
             collmap.Model = new Model()
             {
-                Position = new float[6] {
-                    brush.BBoxMin.X, brush.BBoxMin.Y, brush.BBoxMin.Z,
-                    brush.BBoxMax.X, brush.BBoxMax.Y, brush.BBoxMax.Z
-                },
-                TrianglesoupsOffset = 0, TrianglesoupsSize = 1,
+                BBoxMin = new float[3] { brush.BBoxMin.X, brush.BBoxMin.Y, brush.BBoxMin.Z },
+                BBoxMax = new float[3] { brush.BBoxMax.X, brush.BBoxMax.Y, brush.BBoxMax.Z },
+                TrianglesoupsOffset = 0, TrianglesoupsSize = 0,
                 CollisionaabbsOffset = 0, CollisionaabbsSize = 0,
                 BrushesOffset = 0, BrushesSize = 1
             };

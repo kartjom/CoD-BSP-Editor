@@ -152,8 +152,8 @@ namespace CoD_BSP_Editor.GametypeTools
 
             collmap.Model = new()
             {
-                Position = new float[6] { -64, -64, 0, 64, 64, 152 },
-                TrianglesoupsOffset = 0, TrianglesoupsSize = 1,
+                BBoxMin = new float[3] { -64, -64, 0 }, BBoxMax = new float[3] { 64, 64, 152 },
+                TrianglesoupsOffset = 0, TrianglesoupsSize = 0,
                 CollisionaabbsOffset = 0, CollisionaabbsSize = 0,
                 BrushesOffset = 0, BrushesSize = 1
             };

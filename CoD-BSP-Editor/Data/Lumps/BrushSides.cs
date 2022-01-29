@@ -16,10 +16,20 @@ namespace CoD_BSP_Editor.Data
             return PlaneIndex;
         }
 
+        public void SetPlaneIndex(uint index)
+        {
+            PlaneDistanceUnion = BinLib.ToByteArray<uint>(index);
+        }
+
         public float GetDistance()
         {
             float Distance = BinLib.ReadFromByteArray<float>(PlaneDistanceUnion);
             return Distance;
+        }
+
+        public void SetDistance(float distance)
+        {
+            PlaneDistanceUnion = BinLib.ToByteArray<float>(distance);
         }
     }
 }
