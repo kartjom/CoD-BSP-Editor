@@ -9,13 +9,19 @@ namespace CoD_BSP_Editor.Data
 {
     public class BrushVolume
     {
-        public Vector3 Size = new Vector3();
+        public Vector3 Size = new Vector3(); // Lenght in all directions
         public Vector3 Center = new Vector3();
 
         public Vector3 BBoxMin;
         public Vector3 BBoxMax;
 
+        public int ShaderIndex;
         public float[] Distances = new float[6];
+
+        public BrushVolume()
+        {
+            // For JSON Serializer
+        }
 
         public BrushVolume(Vector3 min, Vector3 max)
         {
@@ -34,18 +40,33 @@ namespace CoD_BSP_Editor.Data
             float endY = float.Parse(endVec[1]);
             float endZ = float.Parse(endVec[2]);
 
-            Vector3 vec1 = new Vector3(startX, startY, startZ);
-            Vector3 vec2 = new Vector3(endX, endY, endZ);
+            Vector3 min = new Vector3(startX, startY, startZ);
+            Vector3 max = new Vector3(endX, endY, endZ);
 
-            this.Initialize(vec1, vec2);
+            this.Initialize(min, max);
         }
 
         public BrushVolume(float[] distances)
         {
-            Vector3 vec1 = new Vector3(distances[0], distances[1], distances[2]);
-            Vector3 vec2 = new Vector3(distances[3], distances[4], distances[5]);
+            Vector3 min = new Vector3(distances[0], distances[1], distances[2]);
+            Vector3 max = new Vector3(distances[3], distances[4], distances[5]);
 
-            this.Initialize(vec1, vec2);
+            this.Initialize(min, max);
+        }
+
+        public BrushVolume(BrushSides[] brushSides)
+        {
+            float xMin = brushSides[0].GetDistance();
+            float yMin = brushSides[3].GetDistance();
+            float zMin = brushSides[4].GetDistance();
+            Vector3 min = new Vector3(xMin, yMin, zMin);
+
+            float xMax = brushSides[1].GetDistance();
+            float yMax = brushSides[2].GetDistance();
+            float zMax = brushSides[5].GetDistance();
+            Vector3 max = new Vector3(xMax, yMax, zMax);
+
+            this.Initialize(min, max);
         }
 
         private void Initialize(Vector3 min, Vector3 max)
@@ -71,6 +92,22 @@ namespace CoD_BSP_Editor.Data
             Distances[5] = Center.Z + (Size.Z / 2); // Top
         }
 
+        public BrushSides[] GetBrushSides()
+        {
+            BrushSides[] brushSides = new BrushSides[6];
+
+            for (int i = 0; i < 6; i++)
+            {
+                BrushSides brushSideStruct = new BrushSides();
+                brushSideStruct.MaterialID = (ushort)this.ShaderIndex;
+                brushSideStruct.SetDistance(this.Distances[i]);
+
+                brushSides[i] = brushSideStruct;
+            }
+
+            return brushSides;
+        }
+
         public bool ContainsVector(Vector3 origin)
         {
             return
@@ -90,7 +127,5 @@ namespace CoD_BSP_Editor.Data
 
             return oldCenter;
         }
-
-
     }
 }
