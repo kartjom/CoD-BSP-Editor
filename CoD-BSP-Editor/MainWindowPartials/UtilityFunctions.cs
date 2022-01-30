@@ -17,6 +17,45 @@ namespace CoD_BSP_Editor
             EntityBoxList.Items.Refresh();
         }
 
+        private void AddEntityList(List<Entity> list)
+        {
+            foreach (Entity ent in list)
+            {
+                EntityBoxList.Items.Add(ent);
+            }
+
+            EntityBoxList.Items.Refresh();
+        }
+
+        public Entity FindEntityByKeyValue(string key, string value)
+        {
+            foreach (Entity ent in EntityBoxList.Items)
+            {
+                if (ent.HasKey(key) && ent.GetValue(key) == value)
+                {
+                    return ent;
+                }
+            }
+
+            return null;
+        }
+
+        public void AddModel(ModelData modelData)
+        {
+            MainWindow.bsp.AddShaders(modelData.Shaders.ToArray());
+            modelData.CorrectShaderIndexes();
+
+            Brush[] brushes = modelData.GetBrushes();
+            BrushSides[] brushSides = modelData.GetBrushSides();
+            Model model = modelData.GetModel();
+
+            MainWindow.bsp.Brushes.AddRange(brushes);
+            MainWindow.bsp.BrushSides.AddRange(brushSides);
+            MainWindow.bsp.Models.Add(model);
+
+            this.AddEntityList(modelData.Entities);
+        }
+
         private int RemoveByClassname(string classname)
         {
             int removed = 0;
