@@ -15,13 +15,10 @@ namespace CoD_BSP_Editor.Data
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
         public uint[] Flags; // Surface, Content
-    }
 
-    public static class ShaderUtils
-    {
-        public static string GetMaterial(Shader shader)
+        public override string ToString()
         {
-            return new string(shader.Material).Trim('\0').ToLower();
+            return new string(this.Material).Trim('\0').ToLower();
         }
 
         public static Shader Construct(string _newMaterial, uint _flag1 = 0, uint _flag2 = 0)

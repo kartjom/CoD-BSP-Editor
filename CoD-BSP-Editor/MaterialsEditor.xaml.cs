@@ -51,7 +51,7 @@ namespace CoD_BSP_Editor
             { Text = $"[{index}]", FontSize = 20, Width = 80, Margin = new Thickness(5), Padding = Padding };
 
             TextBox MaterialInput = new TextBox()
-            { Text = ShaderUtils.GetMaterial(shader), FontSize = 20, Width = 800, Margin = Margin, Padding = Padding, MaxLength = 64};
+            { Text = shader.ToString(), FontSize = 20, Width = 800, Margin = Margin, Padding = Padding, MaxLength = 64};
             MaterialInput.TextChanged += OnInputChange;
 
             TextBox FlagInput = new TextBox()
@@ -112,7 +112,7 @@ namespace CoD_BSP_Editor
             uint ContentFlag = uint.Parse(ContentFlagStr);
 
             /* Updating shaders list */
-            Shader shader = ShaderUtils.Construct(Material, Flag, ContentFlag);
+            Shader shader = Shader.Construct(Material, Flag, ContentFlag);
             MainWindow.bsp.Shaders[shaderIndex] = shader;
         }
 
@@ -166,7 +166,7 @@ namespace CoD_BSP_Editor
             int startIndex = int.Parse(startIndexStr);
             for (int i = startIndex; i < MainWindow.bsp.Shaders.Count; i++)
             {
-                string shaderName = ShaderUtils.GetMaterial(MainWindow.bsp.Shaders[i]).ToLower();
+                string shaderName = MainWindow.bsp.Shaders[i].ToString().ToLower();
                 int foundAt = -1;
 
                 if (exactSearch && shaderName == material)
@@ -238,7 +238,7 @@ namespace CoD_BSP_Editor
                 return;
             }
 
-            Shader newShader = ShaderUtils.Construct(ShaderName, Flag1, Flag2);
+            Shader newShader = Shader.Construct(ShaderName, Flag1, Flag2);
             MainWindow.bsp.Shaders.Add(newShader);
 
             int newShaderIndex = MainWindow.bsp.Shaders.Count - 1;
