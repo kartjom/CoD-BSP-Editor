@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace CoD_BSP_Editor.Data
 {
@@ -16,5 +17,11 @@ namespace CoD_BSP_Editor.Data
         public uint CollisionaabbsSize;
         public uint BrushesOffset;
         public uint BrushesSize;
+
+        public void SetBoundaries(Vector3 min, Vector3 max)
+        {
+            this.BBoxMin = min.ToArray();
+            this.BBoxMax = max.ToArray();
+        }
     }
 }
