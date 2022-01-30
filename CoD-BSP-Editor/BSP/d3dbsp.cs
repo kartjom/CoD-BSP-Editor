@@ -224,39 +224,17 @@ namespace CoD_BSP_Editor.BSP
             return gscContent;
         }
 
-        public void ImportCollmap(CollmapData collmap)
+        public void AddShaders(Shader[] shaders)
         {
-            foreach (Shader shader in collmap.Shaders)
+            foreach (Shader shader in shaders)
             {
-                int MaterialID = this.FindMaterialIndex(ShaderUtils.GetMaterial(shader));
+                int MaterialID = this.FindMaterialIndex(shader.ToString());
 
                 if (MaterialID == -1)
                 {
                     this.Shaders.Add(shader);
                 }
             }
-
-            collmap.Model.BrushesOffset = (uint)this.Brushes.Count;
-            collmap.Model.BrushesSize = (uint)collmap.Brushes.Length;
-
-            for (int i = 0; i < collmap.Brushes.Length; i++)
-            {
-                int CollmapMaterialID = collmap.Brushes[i].MaterialID;
-                string MaterialName = ShaderUtils.GetMaterial(collmap.Shaders[CollmapMaterialID]);
-                int MaterialID = this.FindMaterialIndex(MaterialName);
-
-                collmap.Brushes[i].MaterialID = (ushort)MaterialID;
-
-                int brushSidesOffset = 6 * i;
-                for (int j = brushSidesOffset; j < 6 + brushSidesOffset; j++)
-                {
-                    collmap.BrushSides[j].MaterialID = (uint)MaterialID;
-                }
-            }
-
-            this.BrushSides.AddRange(collmap.BrushSides);
-            this.Brushes.AddRange(collmap.Brushes);
-            this.Models.Add(collmap.Model);
         }
 
         public int FindMaterialIndex(string material)
@@ -265,7 +243,7 @@ namespace CoD_BSP_Editor.BSP
 
             for (int i = 0; i < this.Shaders.Count; i++)
             {
-                string shader = ShaderUtils.GetMaterial(this.Shaders[i]).ToLower();
+                string shader = this.Shaders[i].ToString().ToLower();
                 if (shader == material)
                 {
                     return i;
