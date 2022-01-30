@@ -2,6 +2,7 @@
 using CoD_BSP_Editor.Data;
 using CoD_BSP_Editor.GametypeTools;
 using Microsoft.Win32;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -446,62 +447,112 @@ namespace CoD_BSP_Editor
             MessageBox.Show($"Removed {removed} entities");
         }
 
-        private void ImportCollmap(object sender, RoutedEventArgs e)
+        private void ImportModel(object sender, RoutedEventArgs e)
         {
             if (bsp == null) return;
 
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "collmap file (*.collmap)|*.collmap|All files (*.*)|*.*";
+            openFileDialog.Filter = "model file (*.model)|*.model|All files (*.*)|*.*";
 
             if (openFileDialog.ShowDialog() == true)
             {
-                string fileName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
+                string modelJson = File.ReadAllText(openFileDialog.FileName);
+                ModelData modelData = ModelData.Deserialize(modelJson);
+                modelData.CorrectModelIndexInEntities();
 
-                byte[] collmapData = File.ReadAllBytes(openFileDialog.FileName);
-                CollmapData collmap = CollmapData.ReadFromByteArray(collmapData);
+                this.AddModel(modelData);
 
-                // Add new entity to the list
-                Entity collmapEntity = new Entity("script_vehicle_collmap")
-                {
-                    KeyValues = new()
-                    {
-                        new("model", $"*{bsp.Models.Count}"),
-                        new("targetname", $"xmodel/{fileName}"),
-                    }
-                };
-
-                for (int i = 0; i < collmap.Shaders.Length; i++)
-                {
-                    string shaderName = ShaderUtils.GetMaterial(collmap.Shaders[i]);
-                    collmapEntity.KeyValues.Add(new($"info_shader_{i}", shaderName));
-                }
-
-                EntityBoxList.Items.Add(collmapEntity);
-                EntityBoxList.Items.Refresh();
-
-                // Import collmap
-                bsp.ImportCollmap(collmap);
-
-                MessageBox.Show("Finished importing collmap");
+                MessageBox.Show("Finished importing model");
             }
         }
 
-        private void ExportCollmap(object sender, RoutedEventArgs e)
+        private void ExportModel(object sender, RoutedEventArgs e)
         {
             if (bsp == null) return;
 
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "collmap file (*.collmap)|*.collmap|All files (*.*)|*.*";
-            saveFileDialog.InitialDirectory = bsp.FileDirectory;
-            saveFileDialog.FileName = Path.GetFileNameWithoutExtension(bsp.FileName) + ".collmap";
+            InputDialogWindow input = new("Export model", "Model index to export:", "");
+            input.ShowDialog();
 
-            if (saveFileDialog.ShowDialog() == true)
+            if (input.IsConfirmed == false) return;
+
+            string modelIndexStr = input.GetValue();
+
+            if (string.IsNullOrEmpty(modelIndexStr))
             {
-                byte[] collmapData = bsp.ExtractCollmapData();
-                File.WriteAllBytes(saveFileDialog.FileName, collmapData);
-
-                MessageBox.Show("Finished exporting collmap");
+                MessageBox.Show("Fill model index field before submiting");
+                return;
             }
+
+            int modelIndex;
+            if (int.TryParse(modelIndexStr, out modelIndex) == false)
+            {
+                MessageBox.Show("Could not parse index data");
+                return;
+            }
+
+            if (modelIndex < 0 || modelIndex >= bsp.Models.Count)
+            {
+                MessageBox.Show("Model index out of bounds");
+                return;
+            }
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "model file (*.model)|*.model|All files (*.*)|*.*";
+            saveFileDialog.InitialDirectory = bsp.FileDirectory;
+            saveFileDialog.FileName = Path.GetFileNameWithoutExtension(bsp.FileName) + ".model";
+            
+            if (saveFileDialog.ShowDialog() == false) return;
+
+            ModelData modelData = new ModelData();
+            
+            Model model = bsp.Models[modelIndex];
+            HashSet<int> uniqueShaders = new();
+
+            int brushStart = (int)model.BrushesOffset;
+            int brushEnd = brushStart + (int)model.BrushesSize;
+
+            for (int i = brushStart; i < brushEnd; i++)
+            {
+                BrushSides[] brushSides = BrushSides.GetBrushSides(i);
+                int shaderIndex = (ushort)bsp.Brushes[i].MaterialID;
+
+                BrushVolume brushVolume = new BrushVolume(brushSides) { ShaderIndex = shaderIndex };
+
+                uniqueShaders.Add(shaderIndex);
+                modelData.Brushes.Add(brushVolume);
+            }
+
+            foreach (int shaderIndex in uniqueShaders)
+            {
+                modelData.Shaders.Add(bsp.Shaders[shaderIndex]);
+
+                for (int i = 0; i < modelData.Brushes.Count; i++)
+                {
+                    if (modelData.Brushes[i].ShaderIndex == shaderIndex)
+                    {
+                        modelData.Brushes[i].ShaderIndex = modelData.Shaders.Count - 1;
+                    }
+                }
+            }
+
+            Entity modelEntity = this.FindEntityByKeyValue("model", $"*{modelIndex}");
+            if (modelEntity is not null)
+            {
+                modelData.Entities.Add(modelEntity);
+
+                if (modelEntity.HasKey("origin") && modelEntity.GetValue("origin") != "0 0 0")
+                {
+                    Vector3 originVec = VectorExt.FromString(modelEntity.GetValue("origin"));
+
+                    modelData.CenterBeforeRotation = originVec;
+                    modelData.RotationEnabled = true;
+                }
+            }
+
+            string json = modelData.Serialize();
+            File.WriteAllText(saveFileDialog.FileName, json);
+
+            MessageBox.Show("Finished exporting model");
         }
 
         private void CreateBrush(object sender, RoutedEventArgs e)
@@ -542,33 +593,22 @@ namespace CoD_BSP_Editor
                 return;
             }
 
-            Shader brushShader = ShaderUtils.Construct(ShaderName, 128, 671088641);
-            CollmapData brush = CollmapData.CreateBrush(BBoxMin, BBoxMax, brushShader);
+            ModelData modelData = new ModelData();
 
-            // Add new entity to the list
-            Entity collmapEntity;
+            Shader brushShader = Shader.Construct(ShaderName, 128, 671088641);
+            BrushVolume brushVolume = new BrushVolume(BBoxMin, BBoxMax);
 
-            string brushClassname = IsStatic ? "func_static" : "editor_brush_info";
-            int modelIndex = bsp.Models.Count;
-
-            collmapEntity = new Entity(brushClassname)
+            modelData.Shaders.Add(brushShader);
+            modelData.Brushes.Add(brushVolume);
+            
+            if (IsStatic == false)
             {
-                KeyValues = new()
-                {
-                    new("model", $"*{modelIndex}"),
-                    new("info_min", BBoxMin.String()),
-                    new("info_max", BBoxMax.String()),
-                    new("info_center", BBoxCenter.String()),
-                    new("info_brushindex", bsp.Brushes.Count.ToString()),
-                    new("info_shader", ShaderUtils.GetMaterial(brush.Shaders[0])),
-                }
-            };
+                modelData.EnableRotation();
+            }
 
-            EntityBoxList.Items.Add(collmapEntity);
-            EntityBoxList.Items.Refresh();
+            modelData.Entities.Add(modelData.GetBrushEntity());
 
-            // Import collmap
-            bsp.ImportCollmap(brush);
+            this.AddModel(modelData);
 
             MessageBox.Show("Brush created successfully");
         }
@@ -592,23 +632,17 @@ namespace CoD_BSP_Editor
 
             if (string.IsNullOrEmpty(ModelIndexStr))
             {
-                CollmapData collmap = CtfTools.CreateCollmap();
+                ModelData modelData = CtfTools.CreateModel();
 
-                // Add new entity to the list
                 int modelIndex = bsp.Models.Count;
-                Entity collmapEntity = new Entity("editor_ctf_info")
-                {
-                    KeyValues = new()
-                    {
-                        new("info_model", $"*{modelIndex}"),
-                    }
-                };
 
-                EntityBoxList.Items.Add(collmapEntity);
-                EntityBoxList.Items.Refresh();
+                Entity editor_info = new Entity("editor_ctf_info");
+                editor_info.AddKeyValue("info_model", $"*{modelIndex}");
 
-                // Import collmap
-                bsp.ImportCollmap(collmap);
+                modelData.Entities.Add(editor_info);
+
+                // Import flag model (collisions)
+                this.AddModel(modelData);
 
                 ModelIndexStr = $"*{modelIndex}";
             }
@@ -619,16 +653,11 @@ namespace CoD_BSP_Editor
 
             string alliedEntities = CtfTools.GetAlliesFlagEntities(ModelIndexStr, AlliesFlagPos);
             string axisEntities = CtfTools.GetAxisFlagEntities(ModelIndexStr, AxisFlagPos);
-
             string allEntities = alliedEntities + '\n' + axisEntities;
 
             List<Entity> ParsedEntities = Entity.ParseEntitiesData(allEntities);
 
-            foreach (Entity newEntity in ParsedEntities)
-            {
-                EntityBoxList.Items.Add(newEntity);
-            }
-            EntityBoxList.Items.Refresh();
+            this.AddEntityList(ParsedEntities);
 
             MessageBox.Show("Gametype 'Capture The Flag' successfully added");
         }
