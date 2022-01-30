@@ -270,6 +270,7 @@ namespace CoD_BSP_Editor
             Expander BrushInfoContainer = ((BrushSideOffsetInput.Parent as StackPanel).Parent as StackPanel).Parent as Expander;
 
             int BrushIndex = (int)BrushInfoContainer.Tag;
+            int ModelIndex = this.BrushModelIndexes[BrushIndex];
             int BrushSideIndex = (int)BrushSideOffsetInput.Tag;
 
             string String_Offset = BrushSideOffsetInput.Text;
@@ -324,7 +325,7 @@ namespace CoD_BSP_Editor
                 BrushData[BrushIndex].CalculateCenterFromSides();
 
                 string Center = BrushData[BrushIndex].Center.String(", ");
-                BrushInfoContainer.Header = $"Brush [{BrushIndex}] - ( {Center} )";
+                BrushInfoContainer.Header = $"Brush *{ModelIndex} | [{BrushIndex}] - ( {Center} )";
             }
             catch
             {
@@ -335,7 +336,7 @@ namespace CoD_BSP_Editor
                 BrushData[BrushIndex].CalculateCenterFromSides();
 
                 string Center = BrushData[BrushIndex].Center.String(", ");
-                BrushInfoContainer.Header = $"Brush [{BrushIndex}] - ( {Center} )";
+                BrushInfoContainer.Header = $"Brush *{ModelIndex} | [{BrushIndex}] - ( {Center} )";
             }
         }
 
