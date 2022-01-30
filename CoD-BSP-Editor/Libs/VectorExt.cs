@@ -32,5 +32,10 @@ namespace System.Numerics
 
             return vecString;
         }
+
+        public static float[] ToArray(this Vector3 vec)
+        {
+            return new float[3] { vec.X, vec.Y, vec.Z };
+        }
     }
 }
