@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -125,40 +126,14 @@ namespace CoD_BSP_Editor.GametypeTools
             return axisFlagEntitiesContent;
         }
         
-        public static CollmapData CreateCollmap()
+        public static ModelData CreateModel()
         {
-            CollmapData collmap = new CollmapData();
+            ModelData modelData = new ModelData();
 
-            collmap.Shaders = new Shader[1];
-            collmap.Shaders[0] = ShaderUtils.Construct("textures/common/trigger", 128, 671088641);
+            modelData.Shaders.Add( Shader.Construct("textures/common/trigger", 128, 671088641) );
+            modelData.Brushes.Add( new BrushVolume(new Vector3(-64, -64, 0), new Vector3(64, 64, 152)) );
 
-            collmap.Brushes = new Brush[1];
-            collmap.Brushes[0] = new() { MaterialID = 0, Sides = 6 };
-            
-            collmap.BrushSides = new BrushSides[6];
-
-            collmap.BrushSides[0] = new()
-            { MaterialID = 0, PlaneDistanceUnion = new byte[4] { 0, 0, 128, 194 } };     
-            collmap.BrushSides[1] = new()
-            { MaterialID = 0, PlaneDistanceUnion = new byte[4] { 0, 0, 128, 66 } };
-            collmap.BrushSides[2] = new()
-            { MaterialID = 0, PlaneDistanceUnion = new byte[4] { 0, 0, 128, 194 } };     
-            collmap.BrushSides[3] = new()
-            { MaterialID = 0, PlaneDistanceUnion = new byte[4] { 0, 0, 128, 66 } };
-            collmap.BrushSides[4] = new()
-            { MaterialID = 0, PlaneDistanceUnion = new byte[4] { 0, 0, 0, 128 } };
-            collmap.BrushSides[5] = new()
-            { MaterialID = 0, PlaneDistanceUnion = new byte[4] { 0, 0, 24, 67 } };
-
-            collmap.Model = new()
-            {
-                BBoxMin = new float[3] { -64, -64, 0 }, BBoxMax = new float[3] { 64, 64, 152 },
-                TrianglesoupsOffset = 0, TrianglesoupsSize = 0,
-                CollisionaabbsOffset = 0, CollisionaabbsSize = 0,
-                BrushesOffset = 0, BrushesSize = 1
-            };
-
-            return collmap;
+            return modelData;
         }
     }
 }
