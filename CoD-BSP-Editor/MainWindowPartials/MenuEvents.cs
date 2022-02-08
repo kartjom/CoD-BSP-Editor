@@ -1,6 +1,7 @@
 ﻿using CoD_BSP_Editor.BSP;
 using CoD_BSP_Editor.Data;
 using CoD_BSP_Editor.GametypeTools;
+using CoD_BSP_Editor.Libs;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
@@ -511,12 +512,21 @@ namespace CoD_BSP_Editor
             int brushStart = (int)model.BrushesOffset;
             int brushEnd = brushStart + (int)model.BrushesSize;
 
+            int planeCount = 0;
             for (int i = brushStart; i < brushEnd; i++)
             {
                 BrushSides[] brushSides = BrushSides.GetBrushSides(i);
                 int shaderIndex = (ushort)bsp.Brushes[i].MaterialID;
 
+                Plane[] planes = PlaneExt.GetBrushPlanes(i);
+
+                for (int j = 0; j < planes.Length; j++)
+                {
+                    brushSides[6 + j].SetPlaneIndex((uint)planeCount++);
+                }
+
                 BrushVolume brushVolume = new BrushVolume(brushSides) { ShaderIndex = shaderIndex };
+                brushVolume.Planes.AddRange(planes);
 
                 uniqueShaders.Add(shaderIndex);
                 modelData.Brushes.Add(brushVolume);
