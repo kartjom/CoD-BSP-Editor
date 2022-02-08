@@ -454,16 +454,20 @@ namespace CoD_BSP_Editor
 
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "model file (*.model)|*.model|All files (*.*)|*.*";
+            openFileDialog.Multiselect = true;
 
             if (openFileDialog.ShowDialog() == true)
             {
-                string modelJson = File.ReadAllText(openFileDialog.FileName);
-                ModelData modelData = ModelData.Deserialize(modelJson);
-                modelData.CorrectModelIndexInEntities();
+                foreach (string fileName in openFileDialog.FileNames)
+                {
+                    string modelJson = File.ReadAllText(fileName);
+                    ModelData modelData = ModelData.Deserialize(modelJson);
+                    modelData.CorrectModelIndexInEntities();
 
-                this.AddModel(modelData);
+                    this.AddModel(modelData);
+                }
 
-                MessageBox.Show("Finished importing model");
+                MessageBox.Show($"Finished importing {openFileDialog.FileNames.Length} model" + (openFileDialog.FileNames.Length > 1 ? "s" : ""));
             }
         }
 
