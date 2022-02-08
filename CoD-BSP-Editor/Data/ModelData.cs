@@ -25,9 +25,10 @@ namespace CoD_BSP_Editor.Data
 
             for (int i = 0; i < Brushes.Count; i++)
             {
+                int sidesCount = 6 + Brushes[i].Planes.Count;
                 Brush brushStruct = new Brush
                 {
-                    Sides = 6,
+                    Sides = (ushort)sidesCount,
                     MaterialID = (ushort)Brushes[i].ShaderIndex
                 };
 
@@ -37,17 +38,31 @@ namespace CoD_BSP_Editor.Data
             return newBrushes;
         }
 
-        public BrushSides[] GetBrushSides()
+        public BrushSides[] GetBrushSides(int planeIndexOffset = 0)
         {
             List<BrushSides> brushSides = new();
 
             for (int i = 0; i < Brushes.Count; i++)
             {
-                BrushSides[] sides = Brushes[i].GetBrushSides();
+                BrushSides[] sides = Brushes[i].GetBrushSides(planeIndexOffset);
                 brushSides.AddRange(sides);
+
+                planeIndexOffset += Brushes[i].Planes.Count;
             }
 
             return brushSides.ToArray();
+        }
+
+        public Plane[] GetPlanes()
+        {
+            List<Plane> planes = new();
+
+            for (int i = 0; i < Brushes.Count; i++)
+            {
+                planes.AddRange(Brushes[i].Planes);
+            }
+
+            return planes.ToArray();
         }
 
         public Vector3 GetBBoxMin()
