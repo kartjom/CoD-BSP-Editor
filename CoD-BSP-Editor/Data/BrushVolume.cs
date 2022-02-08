@@ -9,14 +9,11 @@ namespace CoD_BSP_Editor.Data
 {
     public class BrushVolume
     {
-        public Vector3 Size = new Vector3(); // Lenght in all directions
-        public Vector3 Center = new Vector3();
-
         public Vector3 BBoxMin;
         public Vector3 BBoxMax;
 
         public int ShaderIndex;
-        public float[] Distances = new float[6];
+        public List<Plane> Planes = new();
 
         public BrushVolume()
         {
@@ -73,16 +70,48 @@ namespace CoD_BSP_Editor.Data
         {
             BBoxMin = min;
             BBoxMax = max;
-
-            Center = (BBoxMin + BBoxMax) / 2;
-
-            Size.X = Math.Abs(BBoxMin.X - BBoxMax.X);
-            Size.Y = Math.Abs(BBoxMin.Y - BBoxMax.Y);
-            Size.Z = Math.Abs(BBoxMin.Z - BBoxMax.Z);
+            
+            Vector3 Size = this.GetSize();
+            Vector3 Center = this.GetCenter();
 
             // Recalculating the diagonal from the center
             BBoxMin = new Vector3(Center.X - Size.X / 2, Center.Y - Size.Y / 2, Center.Z - Size.Z / 2);
             BBoxMax = new Vector3(Center.X + Size.X / 2, Center.Y + Size.Y / 2, Center.Z + Size.Z / 2);
+        }
+
+        public BrushSides[] GetBrushSides(int planeIndexOffset = 0)
+        {
+            BrushSides[] brushSides = new BrushSides[6 + this.Planes.Count];
+            float[] Distances = this.GetDistances();
+
+            for (int i = 0; i < 6; i++)
+            {
+                BrushSides brushSideStruct = new BrushSides();
+                brushSideStruct.MaterialID = (ushort)this.ShaderIndex;
+                brushSideStruct.SetDistance(Distances[i]);
+
+                brushSides[i] = brushSideStruct;
+            }
+
+            for (int i = 0; i < this.Planes.Count; i++)
+            {
+                BrushSides brushSidePlane = new BrushSides();
+                brushSidePlane.MaterialID = (ushort)this.ShaderIndex;
+
+                int planeIndex = i + planeIndexOffset;
+                brushSidePlane.SetPlaneIndex((uint)planeIndex);
+
+                brushSides[6 + i] = brushSidePlane;
+            }
+
+            return brushSides;
+        }
+
+        public float[] GetDistances()
+        {
+            Vector3 Size = this.GetSize();
+            Vector3 Center = this.GetCenter();
+            float[] Distances = new float[6];
 
             Distances[0] = Center.X - (Size.X / 2); // Left
             Distances[1] = Center.X + (Size.X / 2); // Right
@@ -90,22 +119,22 @@ namespace CoD_BSP_Editor.Data
             Distances[3] = Center.Y + (Size.Y / 2); // Back
             Distances[4] = Center.Z - (Size.Z / 2); // Bottom
             Distances[5] = Center.Z + (Size.Z / 2); // Top
+
+            return Distances;
         }
 
-        public BrushSides[] GetBrushSides()
+        public Vector3 GetSize()
         {
-            BrushSides[] brushSides = new BrushSides[6];
+            float x = Math.Abs(BBoxMin.X - BBoxMax.X);
+            float y = Math.Abs(BBoxMin.Y - BBoxMax.Y);
+            float z = Math.Abs(BBoxMin.Z - BBoxMax.Z);
 
-            for (int i = 0; i < 6; i++)
-            {
-                BrushSides brushSideStruct = new BrushSides();
-                brushSideStruct.MaterialID = (ushort)this.ShaderIndex;
-                brushSideStruct.SetDistance(this.Distances[i]);
+            return new Vector3(x, y, z); // Lenght of the brush in all axes
+        }
 
-                brushSides[i] = brushSideStruct;
-            }
-
-            return brushSides;
+        public Vector3 GetCenter()
+        {
+            return (this.BBoxMin + this.BBoxMax) / 2;
         }
 
         public bool ContainsVector(Vector3 origin)
@@ -118,7 +147,7 @@ namespace CoD_BSP_Editor.Data
 
         public Vector3 MoveByOffset(Vector3 offset)
         {
-            Vector3 oldCenter = this.Center;
+            Vector3 oldCenter = this.GetCenter();
 
             Vector3 newMin = this.BBoxMin + offset;
             Vector3 newMax = this.BBoxMax + offset;
