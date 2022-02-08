@@ -3,6 +3,7 @@ using CoD_BSP_Editor.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -46,11 +47,13 @@ namespace CoD_BSP_Editor
             modelData.CorrectShaderIndexes();
 
             Brush[] brushes = modelData.GetBrushes();
-            BrushSides[] brushSides = modelData.GetBrushSides();
+            BrushSides[] brushSides = modelData.GetBrushSides(MainWindow.bsp.Planes.Count);
+            Plane[] planes = modelData.GetPlanes();
             Model model = modelData.GetModel();
 
             MainWindow.bsp.Brushes.AddRange(brushes);
             MainWindow.bsp.BrushSides.AddRange(brushSides);
+            MainWindow.bsp.Planes.AddRange(planes);
             MainWindow.bsp.Models.Add(model);
 
             this.AddEntityList(modelData.Entities);
