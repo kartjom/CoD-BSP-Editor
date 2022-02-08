@@ -55,12 +55,13 @@ namespace CoD_BSP_Editor.Data
         {
             if (brushIndex >= MainWindow.bsp.Brushes.Count) return default;
 
+            Brush brush = MainWindow.bsp.Brushes[brushIndex];
             List<BrushSides> brushSides = new();
             
             int brushSidesOffset = BrushSides.FindBrushSidesStart(brushIndex);
-            for (int i = brushSidesOffset; i < brushSidesOffset + 6; i++)
+            for (int i = brushSidesOffset; i < brushSidesOffset + brush.Sides; i++)
             {
-                brushSides.Add( MainWindow.bsp.BrushSides[i]);
+                brushSides.Add(MainWindow.bsp.BrushSides[i]);
             }
 
             return brushSides.ToArray();
