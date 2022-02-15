@@ -130,7 +130,7 @@ namespace CoD_BSP_Editor.GametypeTools
         {
             ModelData modelData = new ModelData();
 
-            modelData.Shaders.Add( Shader.Construct("textures/common/trigger", 128, 671088641) );
+            modelData.Shaders.Add( new Shader("textures/common/trigger", 128, 671088641) );
             modelData.Brushes.Add( new BrushVolume(new Vector3(-64, -64, 0), new Vector3(64, 64, 152)) );
 
             return modelData;

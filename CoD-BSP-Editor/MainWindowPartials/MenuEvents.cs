@@ -609,7 +609,7 @@ namespace CoD_BSP_Editor
 
             ModelData modelData = new ModelData();
 
-            Shader brushShader = Shader.Construct(ShaderName, 128, 671088641);
+            Shader brushShader = new Shader(ShaderName, 128, 671088641);
             BrushVolume brushVolume = new BrushVolume(BBoxMin, BBoxMax);
 
             modelData.Shaders.Add(brushShader);

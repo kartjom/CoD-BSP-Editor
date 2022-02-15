@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 
 namespace CoD_BSP_Editor.Data
 {
@@ -13,24 +14,22 @@ namespace CoD_BSP_Editor.Data
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
         public char[] Material;
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-        public uint[] Flags; // Surface, Content
+        public uint SurfaceFlag;
+        public uint ContentFlag;
 
         public override string ToString()
         {
             return new string(this.Material).Trim('\0').ToLower();
         }
 
-        public static Shader Construct(string _newMaterial, uint _flag1 = 0, uint _flag2 = 0)
+        public Shader(string material, uint surfaceFlag = 0, uint contentFlag = 0)
         {
-            _newMaterial = _newMaterial.ToLower();
-            StringBuilder matBuilder = new StringBuilder(_newMaterial).Append('\0', 64 - _newMaterial.Length);
+            material = material.ToLower();
+            StringBuilder matBuilder = new StringBuilder(material).Append('\0', 64 - material.Length);
 
-            return new Shader()
-            {
-                Material = matBuilder.ToString().ToCharArray(),
-                Flags = new uint[] { _flag1, _flag2 }
-            };
+            Material = matBuilder.ToString().ToCharArray();
+            SurfaceFlag = surfaceFlag;
+            ContentFlag = contentFlag;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -15,6 +16,7 @@ namespace CoD_BSP_Editor.Data
         public int ShaderIndex;
         public List<Plane> Planes = new();
 
+        [JsonConstructor]
         public BrushVolume()
         {
             // For JSON Serializer

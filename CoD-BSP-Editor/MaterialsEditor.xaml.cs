@@ -55,12 +55,12 @@ namespace CoD_BSP_Editor
             MaterialInput.TextChanged += OnInputChange;
 
             TextBox FlagInput = new TextBox()
-            { Text = shader.Flags[0].ToString(), FontSize = 20, Width = 150, Margin = Margin, Padding = Padding };
+            { Text = shader.SurfaceFlag.ToString(), FontSize = 20, Width = 150, Margin = Margin, Padding = Padding };
             FlagInput.TextChanged += OnInputChange;
             FlagInput.PreviewTextInput += NumberValidationTextBox;
             
             TextBox ContentFlagInput = new TextBox()
-            { Text = shader.Flags[1].ToString(), FontSize = 20, Width = 150, Margin = Margin, Padding = Padding };
+            { Text = shader.ContentFlag.ToString(), FontSize = 20, Width = 150, Margin = Margin, Padding = Padding };
             ContentFlagInput.TextChanged += OnInputChange;
             ContentFlagInput.PreviewTextInput += NumberValidationTextBox;
 
@@ -112,7 +112,7 @@ namespace CoD_BSP_Editor
             uint ContentFlag = uint.Parse(ContentFlagStr);
 
             /* Updating shaders list */
-            Shader shader = Shader.Construct(Material, Flag, ContentFlag);
+            Shader shader = new Shader(Material, Flag, ContentFlag);
             MainWindow.bsp.Shaders[shaderIndex] = shader;
         }
 
@@ -238,7 +238,7 @@ namespace CoD_BSP_Editor
                 return;
             }
 
-            Shader newShader = Shader.Construct(ShaderName, Flag1, Flag2);
+            Shader newShader = new Shader(ShaderName, Flag1, Flag2);
             MainWindow.bsp.Shaders.Add(newShader);
 
             int newShaderIndex = MainWindow.bsp.Shaders.Count - 1;
