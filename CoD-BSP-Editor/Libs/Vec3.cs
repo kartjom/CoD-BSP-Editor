@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace System.Numerics
 {
-    public static class VectorExt
+    public static class Vec3
     {
         public static Vector3 FromString(string vecString)
         {
