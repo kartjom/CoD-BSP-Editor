@@ -19,6 +19,8 @@ namespace CoD_BSP_Editor.BSP
         public List<Plane> Planes { get; set; }
         public List<BrushSides> BrushSides { get; set; }
         public List<Brush> Brushes { get; set; }
+        public List<DrawVert> DrawVerts { get; set; }
+        public List<Vector3> CollisionVerts { get; set; }
         public List<Model> Models { get; set; }
         public List<Entity> Entities { get; set; }
 
@@ -87,6 +89,8 @@ namespace CoD_BSP_Editor.BSP
             this.Planes = BinLib.ReadListFromByteArray<Plane>(BinaryLumps[2]);
             this.BrushSides = BinLib.ReadListFromByteArray<BrushSides>(BinaryLumps[3]);
             this.Brushes = BinLib.ReadListFromByteArray<Brush>(BinaryLumps[4]);
+            this.DrawVerts = BinLib.ReadListFromByteArray<DrawVert>(BinaryLumps[7]);
+            this.CollisionVerts = BinLib.ReadListFromByteArray<Vector3>(BinaryLumps[25]);
             this.Models = BinLib.ReadListFromByteArray<Model>(BinaryLumps[27]);
 
             string entData = this.EntityLumpToString();
@@ -159,6 +163,14 @@ namespace CoD_BSP_Editor.BSP
             // Brushes
             byte[] newBrushes = BinLib.ListToByteArray<Brush>(this.Brushes);
             this.BinaryLumps[4] = newBrushes;
+
+            // DrawVerts
+            byte[] newDrawVerts = BinLib.ListToByteArray<DrawVert>(this.DrawVerts);
+            this.BinaryLumps[7] = newDrawVerts;
+
+            // CollisionVerts
+            byte[] newCollisionVerts = BinLib.ListToByteArray<Vector3>(this.CollisionVerts);
+            this.BinaryLumps[25] = newCollisionVerts;
 
             // Models
             byte[] newModels = BinLib.ListToByteArray<Model>(this.Models);
