@@ -374,7 +374,7 @@ namespace CoD_BSP_Editor
             int Shader;
             try
             {
-                SeekOrigin = VectorExt.FromString(BrushOrigin);
+                SeekOrigin = Vec3.FromString(BrushOrigin);
 
                 Shader = int.Parse(BrushShaderIndex);
             }
