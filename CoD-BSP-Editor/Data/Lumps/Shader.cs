@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace CoD_BSP_Editor.Data
 {
-    [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct Shader
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
