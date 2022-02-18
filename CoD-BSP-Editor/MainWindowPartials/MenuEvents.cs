@@ -357,7 +357,7 @@ namespace CoD_BSP_Editor
             Vector3 SeekOrigin;
             try
             {
-                SeekOrigin = VectorExt.FromString(SeekOriginString);
+                SeekOrigin = Vec3.FromString(SeekOriginString);
             }
             catch
             {
@@ -378,7 +378,7 @@ namespace CoD_BSP_Editor
                 }
 
                 string originValue = ent.GetValue("origin");
-                Vector3 EntityOrigin = VectorExt.FromString(originValue);
+                Vector3 EntityOrigin = Vec3.FromString(originValue);
 
                 float newDistance = Vector3.Distance(SeekOrigin, EntityOrigin);
                 if (newDistance < closestDistance)
@@ -556,7 +556,7 @@ namespace CoD_BSP_Editor
 
                 if (modelEntity.HasKey("origin") && modelEntity.GetValue("origin") != "0 0 0")
                 {
-                    Vector3 originVec = VectorExt.FromString(modelEntity.GetValue("origin"));
+                    Vector3 originVec = Vec3.FromString(modelEntity.GetValue("origin"));
 
                     modelData.CenterBeforeRotation = originVec;
                     modelData.RotationEnabled = true;
@@ -597,8 +597,8 @@ namespace CoD_BSP_Editor
                 LastCreateBrushShaderString = ShaderName;
                 LastCreateBrushIsStatic = IsStatic;
 
-                BBoxMin = VectorExt.FromString(BBoxMinStr);
-                BBoxMax = VectorExt.FromString(BBoxMaxStr);
+                BBoxMin = Vec3.FromString(BBoxMinStr);
+                BBoxMax = Vec3.FromString(BBoxMaxStr);
                 BBoxCenter = (BBoxMin + BBoxMax) / 2;
             }
             catch
@@ -810,7 +810,7 @@ namespace CoD_BSP_Editor
                 try
                 {
                     string originString = ent.GetValue("origin");
-                    entOrigin = VectorExt.FromString(originString);
+                    entOrigin = Vec3.FromString(originString);
                 }
                 catch
                 {
@@ -855,6 +855,100 @@ namespace CoD_BSP_Editor
             editor.Owner = this;
             editor.Title = $"Brush editor ({bsp.FileName})";
             editor.Show();
+        }
+        
+        private void MoveVertex(object sender, RoutedEventArgs e)
+        {
+            if (bsp == null || bsp.Lumps == null) return;
+
+            DoubleInputDialogWindow wndDialog = new DoubleInputDialogWindow("Move vertex");
+            wndDialog.FirstLabel.Text = "Vertex origin:";
+            wndDialog.FirstInput.Text = "0 0 0";
+            wndDialog.SecondLabel.Text = "Move to:";
+            wndDialog.SecondInput.Text = "1 1 1";
+            wndDialog.ShowDialog();
+
+            if (wndDialog.IsConfirmed == false) return;
+
+            var (origin_s, newOrigin_s) = wndDialog.GetValue();
+
+            if (string.IsNullOrEmpty(origin_s) || string.IsNullOrEmpty(newOrigin_s))
+            {
+                MessageBox.Show("Fill all fields before submiting"); return;
+            }
+
+            Vector3 origin, newOrigin;
+            try
+            {
+                origin = Vec3.FromString(origin_s);
+                newOrigin = Vec3.FromString(newOrigin_s);
+
+                Vertex vertex = new Vertex(origin);
+
+                if (vertex.IsValid() == false)
+                {
+                    MessageBox.Show($"Could not find vertex near {origin}");
+                    return;
+                }
+                vertex.MoveTo(newOrigin);
+
+                MessageBox.Show($"Moved {vertex.VisualVertices.Count} visual and {vertex.CollisionVertices.Count} collision verts");
+            }
+            catch
+            {
+                MessageBox.Show("Could not parse data");
+                return;
+            }
+        }
+
+        private void MoveVerticesWithinBounds(object sender, RoutedEventArgs e)
+        {
+            if (bsp == null || bsp.Lumps == null) return;
+
+            TripleInputDialogWindow wndDialog = new TripleInputDialogWindow("Move vertices within bounds");
+            wndDialog.FirstLabel.Text = "Bounds min:";
+            wndDialog.FirstInput.Text = "0 0 0";
+            wndDialog.SecondLabel.Text = "Bounds max:";
+            wndDialog.SecondInput.Text = "1 1 1";
+            wndDialog.ThirdLabel.Text = "Offset:";
+            wndDialog.ThirdInput.Text = "2 2 2";
+            wndDialog.ShowDialog();
+
+            if (wndDialog.IsConfirmed == false) return;
+
+            var (min_s, max_s, offset_s) = wndDialog.GetValue();
+
+            if (string.IsNullOrEmpty(min_s) || string.IsNullOrEmpty(max_s) || string.IsNullOrEmpty(offset_s))
+            {
+                MessageBox.Show("Fill all fields before submiting"); return;
+            }
+
+            Vector3 min, max, offset;
+            try
+            {
+                min = Vec3.FromString(min_s);
+                max = Vec3.FromString(max_s);
+                offset = Vec3.FromString(offset_s);
+
+                List<Vertex> vertices = Vertex.FindWithinBounds(min, max);
+
+                int visualVertices = 0;
+                int collisionVertices = 0;
+                foreach (Vertex vertex in vertices)
+                {
+                    vertex.MoveByOffset(offset);
+
+                    visualVertices += vertex.VisualVertices.Count;
+                    collisionVertices += vertex.CollisionVertices.Count;
+                }
+
+                MessageBox.Show($"Moved {visualVertices} visual and {collisionVertices} collision verts");
+            }
+            catch
+            {
+                MessageBox.Show("Could not parse data");
+                return;
+            }
         }
 
         private void ShowLumpInfo(object sender, RoutedEventArgs e)

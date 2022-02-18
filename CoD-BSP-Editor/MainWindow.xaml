@@ -53,6 +53,9 @@
                 <MenuItem Header="_Editors" Padding="10 8 10 8">
                     <MenuItem Header="_Materials editor" Click="OpenMaterialsEditor" Padding="5" />
                     <MenuItem Header="_Brush editor" Click="OpenBrushEditor" Padding="5" />
+                    <Separator/>
+                    <MenuItem Header="Move vertex" Click="MoveVertex" Padding="5" />
+                    <MenuItem Header="Move vertices within bounds" Click="MoveVerticesWithinBounds" Padding="5" />
                 </MenuItem>
                 <MenuItem Header="_Info" Padding="10 8 10 8">
                     <MenuItem Header="_Lump Headers" Click="ShowLumpInfo" Padding="5" />
