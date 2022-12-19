@@ -19,6 +19,8 @@ namespace CoD_BSP_Editor.BSP
         public List<Plane> Planes { get; set; }
         public List<BrushSides> BrushSides { get; set; }
         public List<Brush> Brushes { get; set; }
+        public List<DrawVert> DrawVerts { get; set; }
+        public List<Vector3> CollisionVerts { get; set; }
         public List<Model> Models { get; set; }
         public List<Entity> Entities { get; set; }
 
@@ -87,6 +89,8 @@ namespace CoD_BSP_Editor.BSP
             this.Planes = BinLib.ReadListFromByteArray<Plane>(BinaryLumps[2]);
             this.BrushSides = BinLib.ReadListFromByteArray<BrushSides>(BinaryLumps[3]);
             this.Brushes = BinLib.ReadListFromByteArray<Brush>(BinaryLumps[4]);
+            this.DrawVerts = BinLib.ReadListFromByteArray<DrawVert>(BinaryLumps[7]);
+            this.CollisionVerts = BinLib.ReadListFromByteArray<Vector3>(BinaryLumps[25]);
             this.Models = BinLib.ReadListFromByteArray<Model>(BinaryLumps[27]);
 
             string entData = this.EntityLumpToString();
@@ -96,10 +100,18 @@ namespace CoD_BSP_Editor.BSP
         public byte[] ExtractCollmapData()
         {
             List<byte> collmapContent = new();
-            byte[] shaderContent = BinLib.ToByteArray<Shader>(this.Shaders[0]);
+            byte[] shaderContent = BinLib.ListToByteArray<Shader>(this.Shaders);
             byte[] brushSidesContent = BinLib.ListToByteArray<BrushSides>(this.BrushSides);
-            byte[] brushContent = BinLib.ToByteArray<Brush>(this.Brushes[0]);
+            byte[] brushContent = BinLib.ListToByteArray<Brush>(this.Brushes);
             byte[] modelContent = BinLib.ToByteArray<Model>(this.Models[0]);
+
+            byte[] shaderNum = BinLib.ToByteArray<int>(this.Shaders.Count);
+            byte[] brushSidesNum = BinLib.ToByteArray<int>(this.BrushSides.Count);
+            byte[] brushNum = BinLib.ToByteArray<int>(this.Brushes.Count);
+
+            collmapContent.AddRange(shaderNum);
+            collmapContent.AddRange(brushSidesNum);
+            collmapContent.AddRange(brushNum);
 
             collmapContent.AddRange(shaderContent);
             collmapContent.AddRange(brushSidesContent);
@@ -151,6 +163,14 @@ namespace CoD_BSP_Editor.BSP
             // Brushes
             byte[] newBrushes = BinLib.ListToByteArray<Brush>(this.Brushes);
             this.BinaryLumps[4] = newBrushes;
+
+            // DrawVerts
+            byte[] newDrawVerts = BinLib.ListToByteArray<DrawVert>(this.DrawVerts);
+            this.BinaryLumps[7] = newDrawVerts;
+
+            // CollisionVerts
+            byte[] newCollisionVerts = BinLib.ListToByteArray<Vector3>(this.CollisionVerts);
+            this.BinaryLumps[25] = newCollisionVerts;
 
             // Models
             byte[] newModels = BinLib.ListToByteArray<Model>(this.Models);
@@ -216,27 +236,17 @@ namespace CoD_BSP_Editor.BSP
             return gscContent;
         }
 
-        public void ImportCollmap(CollmapData collmap)
+        public void AddShaders(Shader[] shaders)
         {
-            int MaterialID = this.FindMaterialIndex( ShaderUtils.GetMaterial(collmap.Shader) );
-            if (MaterialID == -1)
+            foreach (Shader shader in shaders)
             {
-                // If map does not contain such texture, create add it
-                MaterialID = this.Shaders.Count;
-                this.Shaders.Add(collmap.Shader);
+                int MaterialID = this.FindMaterialIndex(shader.ToString());
+
+                if (MaterialID == -1)
+                {
+                    this.Shaders.Add(shader);
+                }
             }
-
-            collmap.Model.BrushesOffset = (uint)this.Brushes.Count;
-            collmap.Brush.MaterialID = (ushort)MaterialID;
-
-            for (int i = 0; i < 6; i++)
-            {
-                collmap.BrushSides[i].MaterialID = (uint)MaterialID;
-            }
-
-            this.BrushSides.AddRange(collmap.BrushSides);
-            this.Brushes.Add(collmap.Brush);
-            this.Models.Add(collmap.Model);
         }
 
         public int FindMaterialIndex(string material)
@@ -245,7 +255,7 @@ namespace CoD_BSP_Editor.BSP
 
             for (int i = 0; i < this.Shaders.Count; i++)
             {
-                string shader = ShaderUtils.GetMaterial(this.Shaders[i]).ToLower();
+                string shader = this.Shaders[i].ToString().ToLower();
                 if (shader == material)
                 {
                     return i;

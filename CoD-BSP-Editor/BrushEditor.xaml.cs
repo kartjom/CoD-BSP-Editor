@@ -30,6 +30,7 @@ namespace CoD_BSP_Editor
         private readonly Thickness BrushSidesMargin = new(25, 5, 0, 5);
         private readonly Thickness TextInputsMargin = new(25, 0, 10, 0);
 
+        private Dictionary<int, int> BrushModelIndexes = new(); // [BrushIndex] = ModelIndex;
         private List<BrushInfo> BrushData = new();
 
         private string LastFindBrushOrigin = "0 0 0";
@@ -39,8 +40,25 @@ namespace CoD_BSP_Editor
         {
             InitializeComponent();
 
+            this.CreateBrushModelMap();
             this.PrepareBrushData();
             this.InitializeBrushesEditView();
+        }
+
+        private void CreateBrushModelMap()
+        {
+            int modelIndex = 0;
+            foreach (Model model in MainWindow.bsp.Models)
+            {
+                int firstBrushIndex = (int)model.BrushesOffset;
+
+                for (int i = 0; i < model.BrushesSize; i++)
+                {
+                    BrushModelIndexes[firstBrushIndex + i] = modelIndex;
+                }
+
+                modelIndex++;
+            }
         }
 
         private void PrepareBrushData()
@@ -59,11 +77,12 @@ namespace CoD_BSP_Editor
         {
             foreach (BrushInfo brushInfo in this.BrushData)
             {
-                this.CreateBrushEditField(brushInfo.Index);
+                int modelIndex = this.BrushModelIndexes[brushInfo.Index];
+                this.CreateBrushEditField(brushInfo.Index, modelIndex);
             }
         }
 
-        private void CreateBrushEditField(int index)
+        private void CreateBrushEditField(int index, int modelIndex)
         {
             Expander brushSectionExpander = new Expander()
             {
@@ -71,13 +90,12 @@ namespace CoD_BSP_Editor
                 Margin = SectionMargin, Padding = SectionMargin,
                 FontSize = Font, Background = SectionBackground,
 
-                Header = $"Brush [{index}] - ( {BrushData[index].Center.String(", ")} )",
+                Header = $"Brush *{modelIndex} | [{index}] - ( {BrushData[index].Center.String(", ")} )",
                 Tag = index // Brush Index
             };
+            brushSectionExpander.Expanded += OnFirstExpand;
 
             BrushFields.Children.Add(brushSectionExpander);
-
-            brushSectionExpander.Expanded += OnFirstExpand;
         }
 
         private void OnFirstExpand(object sender, RoutedEventArgs e)
@@ -252,6 +270,7 @@ namespace CoD_BSP_Editor
             Expander BrushInfoContainer = ((BrushSideOffsetInput.Parent as StackPanel).Parent as StackPanel).Parent as Expander;
 
             int BrushIndex = (int)BrushInfoContainer.Tag;
+            int ModelIndex = this.BrushModelIndexes[BrushIndex];
             int BrushSideIndex = (int)BrushSideOffsetInput.Tag;
 
             string String_Offset = BrushSideOffsetInput.Text;
@@ -306,7 +325,7 @@ namespace CoD_BSP_Editor
                 BrushData[BrushIndex].CalculateCenterFromSides();
 
                 string Center = BrushData[BrushIndex].Center.String(", ");
-                BrushInfoContainer.Header = $"Brush [{BrushIndex}] - ( {Center} )";
+                BrushInfoContainer.Header = $"Brush *{ModelIndex} | [{BrushIndex}] - ( {Center} )";
             }
             catch
             {
@@ -317,7 +336,7 @@ namespace CoD_BSP_Editor
                 BrushData[BrushIndex].CalculateCenterFromSides();
 
                 string Center = BrushData[BrushIndex].Center.String(", ");
-                BrushInfoContainer.Header = $"Brush [{BrushIndex}] - ( {Center} )";
+                BrushInfoContainer.Header = $"Brush *{ModelIndex} | [{BrushIndex}] - ( {Center} )";
             }
         }
 
@@ -355,7 +374,7 @@ namespace CoD_BSP_Editor
             int Shader;
             try
             {
-                SeekOrigin = VectorExt.FromString(BrushOrigin);
+                SeekOrigin = Vec3.FromString(BrushOrigin);
 
                 Shader = int.Parse(BrushShaderIndex);
             }

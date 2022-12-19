@@ -18,6 +18,11 @@ namespace CoD_BSP_Editor.Data
             this.Classname = classname;
         }
 
+        public void AddKeyValue(string key, string value)
+        {
+            this.KeyValues.Add(new(key, value));
+        }
+
         public string WriteEntity()
         {
             string entityString = "{\n";

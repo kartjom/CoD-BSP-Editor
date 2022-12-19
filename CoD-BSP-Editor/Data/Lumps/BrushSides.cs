@@ -1,4 +1,5 @@
 ﻿using CoD_BSP_Editor.Libs;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace CoD_BSP_Editor.Data
@@ -16,10 +17,54 @@ namespace CoD_BSP_Editor.Data
             return PlaneIndex;
         }
 
+        public void SetPlaneIndex(uint index)
+        {
+            PlaneDistanceUnion = BinLib.ToByteArray<uint>(index);
+        }
+
         public float GetDistance()
         {
             float Distance = BinLib.ReadFromByteArray<float>(PlaneDistanceUnion);
             return Distance;
+        }
+
+        public void SetDistance(float distance)
+        {
+            PlaneDistanceUnion = BinLib.ToByteArray<float>(distance);
+        }
+
+        public override string ToString()
+        {
+            return $"Shader: {this.MaterialID} | Distance: {this.GetDistance()} | Plane: {this.GetPlaneIndex()}";
+        }
+
+        public static int FindBrushSidesStart(int brushIndex)
+        {
+            if (brushIndex >= MainWindow.bsp.Brushes.Count) return -1;
+
+            int index = 0;
+            for (int i = 0; i < brushIndex; i++)
+            {
+                index += MainWindow.bsp.Brushes[i].Sides;
+            }
+
+            return index;
+        }
+
+        public static BrushSides[] GetBrushSides(int brushIndex)
+        {
+            if (brushIndex >= MainWindow.bsp.Brushes.Count) return default;
+
+            Brush brush = MainWindow.bsp.Brushes[brushIndex];
+            List<BrushSides> brushSides = new();
+            
+            int brushSidesOffset = BrushSides.FindBrushSidesStart(brushIndex);
+            for (int i = brushSidesOffset; i < brushSidesOffset + brush.Sides; i++)
+            {
+                brushSides.Add(MainWindow.bsp.BrushSides[i]);
+            }
+
+            return brushSides.ToArray();
         }
     }
 }

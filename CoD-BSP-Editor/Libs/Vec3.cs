@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace System.Numerics
 {
-    public static class VectorExt
+    public static class Vec3
     {
         public static Vector3 FromString(string vecString)
         {
@@ -31,6 +31,17 @@ namespace System.Numerics
             }
 
             return vecString;
+        }
+
+        public static Vector3 FromArray(float[] floatArray)
+        {
+            Vector3 vector = new Vector3(floatArray[0], floatArray[1], floatArray[2]);
+            return vector;
+        }
+
+        public static float[] ToArray(this Vector3 vec)
+        {
+            return new float[3] { vec.X, vec.Y, vec.Z };
         }
     }
 }

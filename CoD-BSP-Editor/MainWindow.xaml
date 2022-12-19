@@ -41,8 +41,8 @@
                     <MenuItem Header="_Remove singleplayer entities" Click="RemoveSingleplayerEntities" Padding="5" />
                     <MenuItem Header="_Add basic spawns" Click="AddBasicSpawns" Padding="5" />
                     <Separator/>
-                    <MenuItem Header="_Import collmap" Click="ImportCollmap" Padding="5" />
-                    <MenuItem Header="_Export map as collmap" Click="ExportCollmap" Padding="5" />
+                    <MenuItem Header="_Import model" Click="ImportModel" Padding="5" />
+                    <MenuItem Header="_Export model" Click="ExportModel" Padding="5" />
                     <Separator/>
                     <MenuItem Header="_Create brush" Click="CreateBrush" Padding="5" />
                 </MenuItem>
@@ -53,6 +53,9 @@
                 <MenuItem Header="_Editors" Padding="10 8 10 8">
                     <MenuItem Header="_Materials editor" Click="OpenMaterialsEditor" Padding="5" />
                     <MenuItem Header="_Brush editor" Click="OpenBrushEditor" Padding="5" />
+                    <Separator/>
+                    <MenuItem Header="Move vertex" Click="MoveVertex" Padding="5" />
+                    <MenuItem Header="Move vertices within bounds" Click="MoveVerticesWithinBounds" Padding="5" />
                 </MenuItem>
                 <MenuItem Header="_Info" Padding="10 8 10 8">
                     <MenuItem Header="_Lump Headers" Click="ShowLumpInfo" Padding="5" />

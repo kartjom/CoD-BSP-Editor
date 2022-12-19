@@ -3,6 +3,7 @@ using CoD_BSP_Editor.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -15,6 +16,47 @@ namespace CoD_BSP_Editor
         {
             EntityBoxList.Items.Add(item);
             EntityBoxList.Items.Refresh();
+        }
+
+        private void AddEntityList(List<Entity> list)
+        {
+            foreach (Entity ent in list)
+            {
+                EntityBoxList.Items.Add(ent);
+            }
+
+            EntityBoxList.Items.Refresh();
+        }
+
+        public Entity FindEntityByKeyValue(string key, string value)
+        {
+            foreach (Entity ent in EntityBoxList.Items)
+            {
+                if (ent.HasKey(key) && ent.GetValue(key) == value)
+                {
+                    return ent;
+                }
+            }
+
+            return null;
+        }
+
+        public void AddModel(ModelData modelData)
+        {
+            MainWindow.bsp.AddShaders(modelData.Shaders.ToArray());
+            modelData.CorrectShaderIndexes();
+
+            Brush[] brushes = modelData.GetBrushes();
+            BrushSides[] brushSides = modelData.GetBrushSides(MainWindow.bsp.Planes.Count);
+            Plane[] planes = modelData.GetPlanes();
+            Model model = modelData.GetModel();
+
+            MainWindow.bsp.Brushes.AddRange(brushes);
+            MainWindow.bsp.BrushSides.AddRange(brushSides);
+            MainWindow.bsp.Planes.AddRange(planes);
+            MainWindow.bsp.Models.Add(model);
+
+            this.AddEntityList(modelData.Entities);
         }
 
         private int RemoveByClassname(string classname)

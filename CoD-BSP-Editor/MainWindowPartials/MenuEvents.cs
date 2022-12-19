@@ -1,7 +1,9 @@
 ﻿using CoD_BSP_Editor.BSP;
 using CoD_BSP_Editor.Data;
 using CoD_BSP_Editor.GametypeTools;
+using CoD_BSP_Editor.Libs;
 using Microsoft.Win32;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -162,8 +164,9 @@ namespace CoD_BSP_Editor
             List<string> defaultEntsList = new()
             {
                 "{\n\"classname\" \"mp_deathmatch_spawn\"\n\"origin\" \"0 0 0\"\n}",
-                "{\n\"classname\" \"mp_uo_spawn_allies\"\n\"model\" \"xmodel/airborne\"\n\"origin\" \"0 0 0\"\n}",
-                "{\n\"classname\" \"mp_uo_spawn_axis\"\n\"model\" \"xmodel/wehrmacht_soldier\"\n\"origin\" \"0 0 0\"\n}",
+                "{\n\"classname\" \"mp_deathmatch_intermission\"\n\"origin\" \"0 0 0\"\n}",
+                "{\n\"classname\" \"mp_uo_spawn_allies\"\n\"origin\" \"0 0 0\"\n}",
+                "{\n\"classname\" \"mp_uo_spawn_axis\"\n\"origin\" \"0 0 0\"\n}",
                 "{\n\"classname\" \"mp_teamdeathmatch_spawn\"\n\"origin\" \"0 0 0\"\n}",
                 "{\n\"classname\" \"mp_teamdeathmatch_intermission\"\n\"origin\" \"0 0 0\"\n}",
                 "{\n\"classname\" \"mp_ctf_intermission\"\n\"origin\" \"0 0 0\"\n}",
@@ -354,7 +357,7 @@ namespace CoD_BSP_Editor
             Vector3 SeekOrigin;
             try
             {
-                SeekOrigin = VectorExt.FromString(SeekOriginString);
+                SeekOrigin = Vec3.FromString(SeekOriginString);
             }
             catch
             {
@@ -375,7 +378,7 @@ namespace CoD_BSP_Editor
                 }
 
                 string originValue = ent.GetValue("origin");
-                Vector3 EntityOrigin = VectorExt.FromString(originValue);
+                Vector3 EntityOrigin = Vec3.FromString(originValue);
 
                 float newDistance = Vector3.Distance(SeekOrigin, EntityOrigin);
                 if (newDistance < closestDistance)
@@ -445,57 +448,125 @@ namespace CoD_BSP_Editor
             MessageBox.Show($"Removed {removed} entities");
         }
 
-        private void ImportCollmap(object sender, RoutedEventArgs e)
+        private void ImportModel(object sender, RoutedEventArgs e)
         {
             if (bsp == null) return;
 
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "collmap file (*.collmap)|*.collmap|All files (*.*)|*.*";
+            openFileDialog.Filter = "model file (*.model)|*.model|All files (*.*)|*.*";
+            openFileDialog.Multiselect = true;
 
             if (openFileDialog.ShowDialog() == true)
             {
-                string fileName = Path.GetFileNameWithoutExtension(openFileDialog.FileName);
-
-                byte[] collmapData = File.ReadAllBytes(openFileDialog.FileName);
-                CollmapData collmap = CollmapData.ReadFromByteArray(collmapData);
-
-                // Add new entity to the list
-                Entity collmapEntity = new Entity("script_vehicle_collmap")
+                foreach (string fileName in openFileDialog.FileNames)
                 {
-                    KeyValues = new()
-                    {
-                        new("model", $"*{bsp.Models.Count}"),
-                        new("targetname", $"xmodel/{fileName}"),
-                        new("info_shader", ShaderUtils.GetMaterial(collmap.Shader)),
-                    }
-                };
+                    string modelJson = File.ReadAllText(fileName);
+                    ModelData modelData = ModelData.Deserialize(modelJson);
+                    modelData.CorrectModelIndexInEntities();
 
-                EntityBoxList.Items.Add(collmapEntity);
-                EntityBoxList.Items.Refresh();
+                    this.AddModel(modelData);
+                }
 
-                // Import collmap
-                bsp.ImportCollmap(collmap);
-
-                MessageBox.Show("Finished importing collmap");
+                MessageBox.Show($"Finished importing {openFileDialog.FileNames.Length} model" + (openFileDialog.FileNames.Length > 1 ? "s" : ""));
             }
         }
 
-        private void ExportCollmap(object sender, RoutedEventArgs e)
+        private void ExportModel(object sender, RoutedEventArgs e)
         {
             if (bsp == null) return;
 
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "collmap file (*.collmap)|*.collmap|All files (*.*)|*.*";
-            saveFileDialog.InitialDirectory = bsp.FileDirectory;
-            saveFileDialog.FileName = Path.GetFileNameWithoutExtension(bsp.FileName) + ".collmap";
+            InputDialogWindow input = new("Export model", "Model index to export:", "");
+            input.ShowDialog();
 
-            if (saveFileDialog.ShowDialog() == true)
+            if (input.IsConfirmed == false) return;
+
+            string modelIndexStr = input.GetValue();
+
+            if (string.IsNullOrEmpty(modelIndexStr))
             {
-                byte[] collmapData = bsp.ExtractCollmapData();
-                File.WriteAllBytes(saveFileDialog.FileName, collmapData);
-
-                MessageBox.Show("Finished exporting collmap");
+                MessageBox.Show("Fill model index field before submiting");
+                return;
             }
+
+            int modelIndex;
+            if (int.TryParse(modelIndexStr, out modelIndex) == false)
+            {
+                MessageBox.Show("Could not parse index data");
+                return;
+            }
+
+            if (modelIndex < 0 || modelIndex >= bsp.Models.Count)
+            {
+                MessageBox.Show("Model index out of bounds");
+                return;
+            }
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "model file (*.model)|*.model|All files (*.*)|*.*";
+            saveFileDialog.InitialDirectory = bsp.FileDirectory;
+            saveFileDialog.FileName = Path.GetFileNameWithoutExtension(bsp.FileName) + ".model";
+            
+            if (saveFileDialog.ShowDialog() == false) return;
+
+            ModelData modelData = new ModelData();
+            
+            Model model = bsp.Models[modelIndex];
+            HashSet<int> uniqueShaders = new();
+
+            int brushStart = (int)model.BrushesOffset;
+            int brushEnd = brushStart + (int)model.BrushesSize;
+
+            int planeCount = 0;
+            for (int i = brushStart; i < brushEnd; i++)
+            {
+                BrushSides[] brushSides = BrushSides.GetBrushSides(i);
+                int shaderIndex = (ushort)bsp.Brushes[i].MaterialID;
+
+                Plane[] planes = PlaneExt.GetBrushPlanes(i);
+
+                for (int j = 0; j < planes.Length; j++)
+                {
+                    brushSides[6 + j].SetPlaneIndex((uint)planeCount++);
+                }
+
+                BrushVolume brushVolume = new BrushVolume(brushSides) { ShaderIndex = shaderIndex };
+                brushVolume.Planes.AddRange(planes);
+
+                uniqueShaders.Add(shaderIndex);
+                modelData.Brushes.Add(brushVolume);
+            }
+
+            foreach (int shaderIndex in uniqueShaders)
+            {
+                modelData.Shaders.Add(bsp.Shaders[shaderIndex]);
+
+                for (int i = 0; i < modelData.Brushes.Count; i++)
+                {
+                    if (modelData.Brushes[i].ShaderIndex == shaderIndex)
+                    {
+                        modelData.Brushes[i].ShaderIndex = modelData.Shaders.Count - 1;
+                    }
+                }
+            }
+
+            Entity modelEntity = this.FindEntityByKeyValue("model", $"*{modelIndex}");
+            if (modelEntity is not null)
+            {
+                modelData.Entities.Add(modelEntity);
+
+                if (modelEntity.HasKey("origin") && modelEntity.GetValue("origin") != "0 0 0")
+                {
+                    Vector3 originVec = Vec3.FromString(modelEntity.GetValue("origin"));
+
+                    modelData.CenterBeforeRotation = originVec;
+                    modelData.RotationEnabled = true;
+                }
+            }
+
+            string json = modelData.Serialize();
+            File.WriteAllText(saveFileDialog.FileName, json);
+
+            MessageBox.Show("Finished exporting model");
         }
 
         private void CreateBrush(object sender, RoutedEventArgs e)
@@ -526,8 +597,8 @@ namespace CoD_BSP_Editor
                 LastCreateBrushShaderString = ShaderName;
                 LastCreateBrushIsStatic = IsStatic;
 
-                BBoxMin = VectorExt.FromString(BBoxMinStr);
-                BBoxMax = VectorExt.FromString(BBoxMaxStr);
+                BBoxMin = Vec3.FromString(BBoxMinStr);
+                BBoxMax = Vec3.FromString(BBoxMaxStr);
                 BBoxCenter = (BBoxMin + BBoxMax) / 2;
             }
             catch
@@ -536,33 +607,22 @@ namespace CoD_BSP_Editor
                 return;
             }
 
-            Shader brushShader = ShaderUtils.Construct(ShaderName, 128, 671088641);
-            CollmapData brush = CollmapData.CreateBrush(BBoxMin, BBoxMax, brushShader);
+            ModelData modelData = new ModelData();
 
-            // Add new entity to the list
-            Entity collmapEntity;
+            Shader brushShader = new Shader(ShaderName, 128, 671088641);
+            BrushVolume brushVolume = new BrushVolume(BBoxMin, BBoxMax);
 
-            string brushClassname = IsStatic ? "func_static" : "editor_brush_info";
-            int modelIndex = bsp.Models.Count;
-
-            collmapEntity = new Entity(brushClassname)
+            modelData.Shaders.Add(brushShader);
+            modelData.Brushes.Add(brushVolume);
+            
+            if (IsStatic == false)
             {
-                KeyValues = new()
-                {
-                    new("model", $"*{modelIndex}"),
-                    new("info_min", BBoxMin.String()),
-                    new("info_max", BBoxMax.String()),
-                    new("info_center", BBoxCenter.String()),
-                    new("info_brushindex", bsp.Brushes.Count.ToString()),
-                    new("info_shader", ShaderUtils.GetMaterial(brush.Shader)),
-                }
-            };
+                modelData.EnableRotation();
+            }
 
-            EntityBoxList.Items.Add(collmapEntity);
-            EntityBoxList.Items.Refresh();
+            modelData.Entities.Add(modelData.GetBrushEntity());
 
-            // Import collmap
-            bsp.ImportCollmap(brush);
+            this.AddModel(modelData);
 
             MessageBox.Show("Brush created successfully");
         }
@@ -586,23 +646,17 @@ namespace CoD_BSP_Editor
 
             if (string.IsNullOrEmpty(ModelIndexStr))
             {
-                CollmapData collmap = CtfTools.CreateCollmap();
+                ModelData modelData = CtfTools.CreateModel();
 
-                // Add new entity to the list
                 int modelIndex = bsp.Models.Count;
-                Entity collmapEntity = new Entity("editor_ctf_info")
-                {
-                    KeyValues = new()
-                    {
-                        new("info_model", $"*{modelIndex}"),
-                    }
-                };
 
-                EntityBoxList.Items.Add(collmapEntity);
-                EntityBoxList.Items.Refresh();
+                Entity editor_info = new Entity("editor_ctf_info");
+                editor_info.AddKeyValue("info_model", $"*{modelIndex}");
 
-                // Import collmap
-                bsp.ImportCollmap(collmap);
+                modelData.Entities.Add(editor_info);
+
+                // Import flag model (collisions)
+                this.AddModel(modelData);
 
                 ModelIndexStr = $"*{modelIndex}";
             }
@@ -613,16 +667,11 @@ namespace CoD_BSP_Editor
 
             string alliedEntities = CtfTools.GetAlliesFlagEntities(ModelIndexStr, AlliesFlagPos);
             string axisEntities = CtfTools.GetAxisFlagEntities(ModelIndexStr, AxisFlagPos);
-
             string allEntities = alliedEntities + '\n' + axisEntities;
 
             List<Entity> ParsedEntities = Entity.ParseEntitiesData(allEntities);
 
-            foreach (Entity newEntity in ParsedEntities)
-            {
-                EntityBoxList.Items.Add(newEntity);
-            }
-            EntityBoxList.Items.Refresh();
+            this.AddEntityList(ParsedEntities);
 
             MessageBox.Show("Gametype 'Capture The Flag' successfully added");
         }
@@ -761,7 +810,7 @@ namespace CoD_BSP_Editor
                 try
                 {
                     string originString = ent.GetValue("origin");
-                    entOrigin = VectorExt.FromString(originString);
+                    entOrigin = Vec3.FromString(originString);
                 }
                 catch
                 {
@@ -806,6 +855,100 @@ namespace CoD_BSP_Editor
             editor.Owner = this;
             editor.Title = $"Brush editor ({bsp.FileName})";
             editor.Show();
+        }
+        
+        private void MoveVertex(object sender, RoutedEventArgs e)
+        {
+            if (bsp == null || bsp.Lumps == null) return;
+
+            DoubleInputDialogWindow wndDialog = new DoubleInputDialogWindow("Move vertex");
+            wndDialog.FirstLabel.Text = "Vertex origin:";
+            wndDialog.FirstInput.Text = "0 0 0";
+            wndDialog.SecondLabel.Text = "Move to:";
+            wndDialog.SecondInput.Text = "1 1 1";
+            wndDialog.ShowDialog();
+
+            if (wndDialog.IsConfirmed == false) return;
+
+            var (origin_s, newOrigin_s) = wndDialog.GetValue();
+
+            if (string.IsNullOrEmpty(origin_s) || string.IsNullOrEmpty(newOrigin_s))
+            {
+                MessageBox.Show("Fill all fields before submiting"); return;
+            }
+
+            Vector3 origin, newOrigin;
+            try
+            {
+                origin = Vec3.FromString(origin_s);
+                newOrigin = Vec3.FromString(newOrigin_s);
+
+                Vertex vertex = new Vertex(origin);
+
+                if (vertex.IsValid() == false)
+                {
+                    MessageBox.Show($"Could not find vertex near {origin}");
+                    return;
+                }
+                vertex.MoveTo(newOrigin);
+
+                MessageBox.Show($"Moved {vertex.VisualVertices.Count} visual and {vertex.CollisionVertices.Count} collision verts");
+            }
+            catch
+            {
+                MessageBox.Show("Could not parse data");
+                return;
+            }
+        }
+
+        private void MoveVerticesWithinBounds(object sender, RoutedEventArgs e)
+        {
+            if (bsp == null || bsp.Lumps == null) return;
+
+            TripleInputDialogWindow wndDialog = new TripleInputDialogWindow("Move vertices within bounds");
+            wndDialog.FirstLabel.Text = "Bounds min:";
+            wndDialog.FirstInput.Text = "0 0 0";
+            wndDialog.SecondLabel.Text = "Bounds max:";
+            wndDialog.SecondInput.Text = "1 1 1";
+            wndDialog.ThirdLabel.Text = "Offset:";
+            wndDialog.ThirdInput.Text = "2 2 2";
+            wndDialog.ShowDialog();
+
+            if (wndDialog.IsConfirmed == false) return;
+
+            var (min_s, max_s, offset_s) = wndDialog.GetValue();
+
+            if (string.IsNullOrEmpty(min_s) || string.IsNullOrEmpty(max_s) || string.IsNullOrEmpty(offset_s))
+            {
+                MessageBox.Show("Fill all fields before submiting"); return;
+            }
+
+            Vector3 min, max, offset;
+            try
+            {
+                min = Vec3.FromString(min_s);
+                max = Vec3.FromString(max_s);
+                offset = Vec3.FromString(offset_s);
+
+                List<Vertex> vertices = Vertex.FindWithinBounds(min, max);
+
+                int visualVertices = 0;
+                int collisionVertices = 0;
+                foreach (Vertex vertex in vertices)
+                {
+                    vertex.MoveByOffset(offset);
+
+                    visualVertices += vertex.VisualVertices.Count;
+                    collisionVertices += vertex.CollisionVertices.Count;
+                }
+
+                MessageBox.Show($"Moved {visualVertices} visual and {collisionVertices} collision verts");
+            }
+            catch
+            {
+                MessageBox.Show("Could not parse data");
+                return;
+            }
         }
 
         private void ShowLumpInfo(object sender, RoutedEventArgs e)
