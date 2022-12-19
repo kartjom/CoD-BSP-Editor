@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <RootNamespace>CoD_BSP_Editor</RootNamespace>
     <UseWPF>true</UseWPF>
     <ApplicationIcon />

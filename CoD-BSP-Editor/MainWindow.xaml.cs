@@ -44,7 +44,7 @@ namespace CoD_BSP_Editor
 
         public string GetGithub()
         {
-            return "https://github.com/KartaB";
+            return "https://github.com/kartjom";
         }
 
         private void UpdateCurrentEntityText()
